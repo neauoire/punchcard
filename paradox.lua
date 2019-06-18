@@ -25,17 +25,39 @@
 
 engine.name = "PolyPerc"
 
+local sprites = {}
+
+sprites['*'] ={
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+}
+
+sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
+sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
+sprites['3'] = { 1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
+sprites['A'] = { 0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1 }
+sprites['B'] = { 1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0 }
+sprites['C'] = { 0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0 }
+sprites['D'] = { 1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0 }
+sprites['E'] = { 1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1 }
+sprites['F'] = { 1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0 }
+sprites['G'] = { 0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,0 }
+sprites['#'] = { 0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0 }
+
 local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
 local playhead = { x = 1, y = 1, o = 1, octave = 3, note = 'C', sprite = {
-      0,1,1,1,0,
-      1,0,0,0,1,
-      1,0,0,0,1,
-      1,0,0,0,1,
-      0,1,1,1,0,
-    } }
+  0,1,1,1,0,
+  1,0,0,0,1,
+  1,0,0,0,1,
+  1,0,0,0,1,
+  0,1,1,1,0,
+} }
 
 local events = {}
 
@@ -50,43 +72,56 @@ local fns = {
       0,0,1,0,0,
     },
     run = function()
-      if playhead.o == 0 then
-        playhead.o = 2
-      elseif playhead.o == 1 then
-        playhead.o = 3
-      elseif playhead.o == 2 then
-        playhead.o = 0
-      else
-        playhead.o = 1
-      end
+    if playhead.o == 0 then
+      playhead.o = 2
+    elseif playhead.o == 1 then
+      playhead.o = 3
+    elseif playhead.o == 2 then
+      playhead.o = 0
+    else
+      playhead.o = 1
     end
+  end
+},
+-- TURN
+turn = {
+  sprite = {
+    0,1,0,1,0,
+    1,1,1,1,1,
+    0,1,0,1,0,
+    1,1,1,1,1,
+    0,1,0,1,0,
   },
-  -- TURN
-  turn = {
-    sprite = {
-      0,0,1,0,0,
-      0,0,1,0,0,
-      1,1,1,0,1,
-      0,0,0,0,0,
-      0,0,1,0,0,
-    },
-    run = function()
-      playhead.o = (playhead.o + 1) % 4
-    end
+  run = function()
+  playhead.o = (playhead.o + 1) % 4
+end
+},
+-- SKIP
+skip = {
+  sprite = {
+    0,0,1,0,0,
+    0,0,1,1,0,
+    1,1,1,0,1,
+    0,0,1,1,0,
+    0,0,1,0,0,
   },
-  -- SKIP
-  skip = {
-    sprite = {
-      0,0,1,0,0,
-      0,0,1,1,0,
-      1,1,1,0,1,
-      0,0,1,1,0,
-      0,0,1,0,0,
-    },
-    run = function()
-      move()
-    end
-  }
+  run = function()
+  move()
+end
+},
+-- MUTE
+mute = {
+  sprite = {
+    1,0,1,0,1,
+    0,0,0,0,0,
+    1,0,1,0,1,
+    0,0,0,0,0,
+    1,0,1,0,1,
+  },
+  run = function()
+  move()
+end
+}
 }
 
 function init()
@@ -95,11 +130,13 @@ function init()
   template.bounds.y = math.floor(viewport.h/template.size.h)-1
   print('Bounds '..template.bounds.x..','..template.bounds.y)
   -- Events
-  add_event(7,1,fns.flip)
-  add_event(10,1,fns.turn)
+  move_to(3,3)
+  add_event(15,3,fns.flip)
+  add_event(10,3,fns.turn)
   add_event(10,2,fns.turn)
   add_event(11,2,fns.flip)
   add_event(12,2,fns.skip)
+  add_event(13,6,fns.mute)
   -- Ready
   start()
 end
@@ -150,6 +187,11 @@ function move()
   redraw()
 end
 
+function move_to(x,y)
+  playhead.x = x
+  playhead.y = y
+end
+
 function run()
   event = get_event(playhead.x,playhead.y)
   if event == nil then return end
@@ -180,6 +222,10 @@ end
 
 function is_selection(x,y)
   return x == playhead.x and y == playhead.y
+end
+
+function get_sprite(id)
+  return sprites[id]
 end
 
 function draw_sprite(x,y,sprite)
@@ -216,9 +262,16 @@ function draw_grid()
   screen.stroke()
 end
 
+function draw_state()
+  draw_sprite(0,0,get_sprite('3'))
+  draw_sprite(1,0,get_sprite('C'))
+  draw_sprite(2,0,get_sprite('#'))
+end
+
 function redraw()
   screen.clear()
   draw_grid()
+  draw_state()
   screen.update()
 end
 
