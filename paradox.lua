@@ -68,7 +68,11 @@ sprites['skip'] = {
 sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
 sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
 sprites['3'] = { 1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
+sprites['4'] = { 0,0,0,1,0,0,0,1,1,0,0,1,0,1,0,1,1,1,1,1,0,0,0,1,0 }
 sprites['5'] = { 1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
+sprites['6'] = { 1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1 }
+sprites['7'] = { 1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 }
+sprites['8'] = { 0,1,1,1,0,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,0,1,1,1,0 }
 sprites['A'] = { 0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1 }
 sprites['B'] = { 1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0 }
 sprites['C'] = { 0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0 }
@@ -83,8 +87,10 @@ sprites['flip'] = { 1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1 }
 sprites['mute'] = { 1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1 }
 sprites['incr'] = { 0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1 }
 sprites['imaj'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,1,1,1,1 }
+sprites['ioct'] = { 0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,0,1,0,0 }
 sprites['decr'] = { 1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,0 }
 sprites['dmaj'] = { 1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1 }
+sprites['doct'] = { 0,0,1,0,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,0 }
 sprites['turn'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0 }
 
 local counter
@@ -92,78 +98,70 @@ local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
 local playhead = { x = 1, y = 1, o = 1, v = 60 }
-
 local events = {}
 
 local fns = {
   -- FLIP
   flip = {
     sprite = sprites.flip,
-    run = function()
-    if playhead.o == 0 then
-      playhead.o = 2
-    elseif playhead.o == 1 then
-      playhead.o = 3
-    elseif playhead.o == 2 then
-      playhead.o = 0
-    else
-      playhead.o = 1
-    end
+    next = 'turn',
+    run = function() if playhead.o == 0 then playhead.o = 2 elseif playhead.o == 1 then playhead.o = 3 elseif playhead.o == 2 then playhead.o = 0 else playhead.o = 1 end
   end 
   },
   -- TURN
   turn = {
     sprite = sprites.turn,
-    run = function()
-    playhead.o = (playhead.o + 1) % 4
-  end
+    next = 'skip',
+    run = function() playhead.o = (playhead.o + 1) % 4 end
   },
   -- SKIP
   skip = {
     sprite = sprites.skip,
-    run = function()
-      move()
-    end
+    next = 'mute',
+    run = function() move() end
   },
   -- MUTE
   mute = {
     sprite = sprites.mute,
-    run = function()
-      if playhead.mute == true then
-        playhead.mute = false
-      else
-        playhead.mute = true
-      end
-    end
+    next = 'incr',
+    run = function() if playhead.mute == true then playhead.mute = false else playhead.mute = true end end
   },
   -- INCR
   incr = {
     sprite = sprites.incr,
-    run = function()
-      playhead.v = (playhead.v + 1) % 127
-    end
+    next = 'imaj',
+    run = function() playhead.v = (playhead.v + 1) % 127 end
   },
   -- INCR MAJ
   imaj = {
     sprite = sprites.imaj,
-    run = function()
-      playhead.v = get_next_maj(playhead.v)
-    end
+    next = 'ioct',
+    run = function() playhead.v = get_next_maj(playhead.v) end
+  },
+  -- INCR OCT
+  ioct = {
+    sprite = sprites.ioct,
+    next = 'decr',
+    run = function() playhead.v = (playhead.v + 12) % 127 end
   },
   -- DECR
   decr = {
     sprite = sprites.decr,
-    run = function()
-      playhead.v = (playhead.v - 1) % 127
-    end
+    next = 'dmaj',
+    run = function() playhead.v = (playhead.v - 1) % 127 end
   },
   -- DEC MAJ
   dmaj = {
     sprite = sprites.dmaj,
-    run = function()
-      playhead.v = get_prev_maj(playhead.v)
-    end
-  }
+    next = 'doct',
+    run = function() playhead.v = get_prev_maj(playhead.v) end
+  },
+  -- DECR OCT
+  doct = {
+    sprite = sprites.doct,
+    next = nil,
+    run = function() playhead.v = (playhead.v - 12) % 127 end
+  },
 }
 
 function init()
@@ -184,6 +182,8 @@ function init()
   add_event(2,3,fns.turn)
   add_event(2,6,fns.turn)
   add_event(6,6,fns.turn)
+  add_event(7,8,fns.ioct)
+  add_event(3,2,fns.doct)
   add_event(10,3,fns.turn)
   add_event(10,2,fns.turn)
   add_event(11,2,fns.flip)
@@ -203,10 +203,11 @@ end
 function tic()
   move()
   run()
+  send()
 end
 
 function add_event(x,y,e)
-  print('Added event ')
+  print('Added event ',e)
   events[x..','..y] = e
 end
 
@@ -216,12 +217,39 @@ end
 
 function toggle_play()
   if is_playing == true then
-    counter:stop()
-    is_playing = false
+    stop()
   else
-    counter:start()
-    is_playing = true
+    play()
   end
+end
+
+function play()
+  counter:start()
+  is_playing = true
+end
+
+function stop()
+  counter:stop()
+  is_playing = false
+  playhead.o = 1
+end
+
+function incr_fn()
+  selection = get_event(playhead.x,playhead.y)
+  if selection == nil then
+    add_event(playhead.x,playhead.y,fns.flip)
+  elseif selection.next == nil then
+    print('clear')
+    add_event(playhead.x,playhead.y,nil)
+  else
+    print('default',selection.next)
+    add_event(playhead.x,playhead.y,fns[selection.next])  
+  end
+  redraw()
+end
+
+function send()
+  
 end
 
 -- Playhead
@@ -242,18 +270,6 @@ end
 function move_to(x,y)
   playhead.x = x
   playhead.y = y
-end
-
-function get_octave()
-  return math.floor(playhead.v/12)
-end
-
-function get_note()
-  return notes[playhead.v % 12].name
-end
-
-function get_sharp()
-  return notes[playhead.v % 12].sharp
 end
 
 function run()
@@ -278,6 +294,10 @@ function key(n,z)
   if z ~= 1 then return end
   if n == 2 then
     toggle_play()
+  end
+  if n == 3 then
+    incr_fn()
+    stop()
   end
   redraw()
 end
@@ -349,6 +369,20 @@ function redraw()
   draw_grid()
   draw_state()
   screen.update()
+end
+
+-- Playhead Utils
+
+function get_octave()
+  return math.floor(playhead.v/12)
+end
+
+function get_note()
+  return notes[playhead.v % 12].name
+end
+
+function get_sharp()
+  return notes[playhead.v % 12].sharp
 end
 
 -- Utils
