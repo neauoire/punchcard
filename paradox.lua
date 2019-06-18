@@ -27,78 +27,62 @@ engine.name = "PolyPerc"
 
 local counter
 local is_playing = true
+local viewport = { w = 128, h = 64 }
+local template = { size = { w = 6, h = 6 }, bounds = {} }
+local playhead = { x = 1, y = 1, direction = 0, octave = 3, note = 'C', sprite = {
+      0,0,1,0,0,
+      0,1,0,1,0,
+      1,0,0,0,1,
+      0,1,0,1,0,
+      0,0,1,0,0,
+    } }
 
-note = 40
-position = { x = 1, y = 1 }
-step = {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}
-STEPS = 16
-edit = 1
-
-function inc() note = util.clamp(note + 5, 40, 120) end
-function dec() note = util.clamp(note - 5, 40, 120) end
-function bottom() note = 40 end
-function top() note = 120 end
-function rand() note = math.random(80) + 40 end
-function metrofast() counter.time = 0.125 end
-function metroslow() counter.time = 0.25 end
-function positionrand() position.x = math.random(STEPS) end
-
-act = {inc, dec, bottom, top, rand, metrofast, metroslow, positionrand}
-COMMANDS = 8
-label = {"+", "-", "<", ">", "*", "M", "m", "#"}
+local events = {}
+local fns = {
+  flip = {
+    sprite = {
+      0,1,1,1,0,
+      1,0,0,0,1,
+      1,0,0,0,1,
+      1,0,0,0,1,
+      0,1,1,1,0,
+    },
+    run = function()
+      print('hit')
+    end
+  }
+}
 
 function init()
-  params:add_control("cutoff", "cutoff", controlspec.new(50, 5000, 'exp', 0, 555, 'hz'))
-  params:set_action("cutoff", function(x) engine.cutoff(x) end)
-  counter = metro.init(count, 0.125, -1)
+  -- Make bounds
+  template.bounds.x = math.floor(viewport.w/template.size.w)-1
+  template.bounds.y = math.floor(viewport.h/template.size.h)-1
+  print('Bounds '..template.bounds.x..','..template.bounds.y)
+  -- Events
+  add_event(7,1,fns.flip)
+  -- Ready
+  start()
+end
+
+function start()
+  -- Start
+  counter = metro.init(tic, 0.500, -1)
   counter:start()
-end
-
-function count()
-  position.x = (position.x % STEPS) + 1
-  act[step[position.x]]()
-  engine.hz(midi_to_hz(note))
   redraw()
 end
 
-function redraw()
-  screen.clear()
-  
-  for i = 1,16 do
-    screen.level((i == edit) and 15 or 2)
-    screen.move(i*8-8,40)
-    screen.text(label[step[i]])
-    if i == position.x then
-      screen.move(i*8-8, 45)
-      screen.line_rel(6,0)
-      screen.stroke()
-    end
-  end
-  
-  screen.update()
+function tic()
+  move()
+  run()
 end
 
-function enc(n,d)
-  if n == 1 then
-    params:delta("cutoff", d)
-  elseif n == 2 then
-    edit = util.clamp(edit + d, 1, STEPS)
-  elseif n ==3 then
-    step[edit] = util.clamp(step[edit]+d, 1, COMMANDS)
-  end
-  redraw()
+function add_event(x,y,e)
+  print('Added event ')
+  events[x..','..y] = e
 end
 
-function key(n,z)
-  if z ~= 1 then return end
-
-  if n == 2 then
-    toggle_play()
-  end
-  if n == 3 then
-    randomize_steps()
-  end
-  redraw()
+function get_event(x,y)
+  return events[x..','..y]
 end
 
 function toggle_play()
@@ -111,12 +95,91 @@ function toggle_play()
   end
 end
 
+-- Playhead
+
+function move()
+  playhead.x = (playhead.x + 1) % (template.bounds.x)
+  redraw()
+end
+
+function run()
+  event = get_event(playhead.x,playhead.y)
+  if event == nil then return end
+  event.run()
+end
+
+-- Interaction
+
+function enc(n,delta)
+  if n == 2 then
+    playhead.x = clamp(playhead.x + delta,1,template.bounds.x)
+  elseif n == 3 then
+    playhead.y = clamp(playhead.y + delta,1,template.bounds.y)
+  end
+  
+  redraw()
+end
+
+function key(n,z)
+  if z ~= 1 then return end
+  if n == 2 then
+    toggle_play()
+  end
+  redraw()
+end
+
+-- Render
+
+function is_selection(x,y)
+  return x == playhead.x and y == playhead.y
+end
+
+function draw_sprite(x,y,sprite)
+  for _y = 1,5 do
+    for _x = 1,5 do
+      id = ((_y-1) * 5) + _x
+      if sprite[id] == 1 then
+        sprite_x = _x + (x * template.size.w)
+        sprite_y = _y + (y * template.size.h)
+        screen.pixel(sprite_x,sprite_y)
+      end
+    end
+  end
+  screen.fill()
+end
+
+function draw_tile(x,y)
+  if is_selection(x,y) then
+    draw_sprite(x,y,playhead.sprite)
+    return
+  end
+  event = get_event(x,y)
+  if event then
+    draw_sprite(x,y,event.sprite)
+  end
+end
+
+function draw_grid()
+  for x = 1,template.bounds.x do
+    for y = 1,template.bounds.y do
+      draw_tile(x,y)
+    end
+  end
+  screen.stroke()
+end
+
+function redraw()
+  screen.clear()
+  draw_grid()
+  screen.update()
+end
+
+-- Utils
+
 function midi_to_hz(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
 end
 
-function randomize_steps()
-  for i= 1,16 do
-    step[i] = math.random(COMMANDS)
-  end
+function clamp(val,min,max)
+  return val < min and min or val > max and max or val
 end
