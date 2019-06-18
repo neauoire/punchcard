@@ -57,40 +57,6 @@ sprites['*'] ={
   1,0,0,0,1,
 }
 
-
-
-sprites['turn'] = {
-  0,0,1,0,1,
-  0,0,1,0,1,
-  1,1,1,0,1,
-  0,0,0,0,1,
-  1,1,1,1,1,
-}
-
-sprites['incr'] = {
-  0,0,1,0,0,
-  0,1,0,1,0,
-  1,0,0,0,1,
-  0,1,0,1,0,
-  0,0,1,0,0,
-}
-
-sprites['incr'] = {
-  0,0,1,0,0,
-  0,1,0,1,0,
-  1,0,1,0,1,
-  0,1,0,1,0,
-  1,0,0,0,1,
-}
-
-sprites['imaj'] = {
-  0,0,1,0,0,
-  0,1,0,1,0,
-  1,0,0,0,1,
-  0,0,0,0,0,
-  1,1,1,1,1,
-}
-
 sprites['skip'] = {
   0,0,1,0,0,
   0,0,1,1,0,
@@ -115,6 +81,11 @@ sprites['.'] = { 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 }
 
 sprites['flip'] = { 1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1 }
 sprites['mute'] = { 1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1 }
+sprites['incr'] = { 0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1 }
+sprites['imaj'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,1,1,1,1 }
+sprites['decr'] = { 1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,0 }
+sprites['dmaj'] = { 1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1 }
+sprites['turn'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0 }
 
 local counter
 local is_playing = true
@@ -206,6 +177,13 @@ function init()
   add_event(4,3,fns.mute)
   add_event(7,3,fns.flip)
   add_event(1,3,fns.flip)
+  add_event(7,4,fns.incr)
+  add_event(1,4,fns.imaj)
+  add_event(6,5,fns.decr)
+  add_event(2,5,fns.dmaj)
+  add_event(2,3,fns.turn)
+  add_event(2,6,fns.turn)
+  add_event(6,6,fns.turn)
   add_event(10,3,fns.turn)
   add_event(10,2,fns.turn)
   add_event(11,2,fns.flip)
@@ -382,20 +360,12 @@ function get_next_maj(v)
   if note == 3 or note == 10 then return v + 3 end
 end
 
-
-notes = {}
-notes[0]  = { name = 'C', sharp = false }
-notes[1]  = { name = 'C', sharp = true  }
-notes[2]  = { name = 'D', sharp = false }
-notes[3]  = { name = 'D', sharp = true  }
-notes[4]  = { name = 'E', sharp = false }
-notes[5]  = { name = 'F', sharp = false }
-notes[6]  = { name = 'F', sharp = true  }
-notes[7]  = { name = 'G', sharp = false }
-notes[8]  = { name = 'G', sharp = true  }
-notes[9]  = { name = 'A', sharp = false }
-notes[10] = { name = 'A', sharp = true  }
-notes[11] = { name = 'B', sharp = false }
+function get_prev_maj(v)
+  note = v % 12
+  if note == 0 or note == 5 then return v - 1 end
+  if note == 2 or note == 3 or note == 4 or note == 7 or note == 8 or note == 9 or note == 10 or note == 11 then return v - 2 end
+  if note == 1 or note == 6 then return v - 3 end
+end
 
 function midi_to_hz(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
