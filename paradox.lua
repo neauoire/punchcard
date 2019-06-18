@@ -27,7 +27,21 @@ engine.name = "PolyPerc"
 
 local sprites = {}
 
-sprites['*'] ={
+notes = {}
+notes[0]  = { name = 'C', sharp = false }
+notes[1]  = { name = 'C', sharp = true  }
+notes[2]  = { name = 'D', sharp = false }
+notes[3]  = { name = 'D', sharp = true  }
+notes[4]  = { name = 'E', sharp = false }
+notes[5]  = { name = 'F', sharp = false }
+notes[6]  = { name = 'F', sharp = true  }
+notes[7]  = { name = 'G', sharp = false }
+notes[8]  = { name = 'G', sharp = true  }
+notes[9]  = { name = 'A', sharp = false }
+notes[10] = { name = 'A', sharp = true  }
+notes[11] = { name = 'B', sharp = false }
+
+sprites[' '] ={
   0,0,0,0,0,
   0,0,0,0,0,
   0,0,0,0,0,
@@ -36,16 +50,59 @@ sprites['*'] ={
 }
 
 sprites['*'] ={
-  0,0,0,0,0,
-  0,0,0,0,0,
+  1,0,0,0,1,
+  0,1,0,1,0,
   0,0,1,0,0,
+  0,1,0,1,0,
+  1,0,0,0,1,
+}
+
+
+
+sprites['turn'] = {
+  0,0,1,0,1,
+  0,0,1,0,1,
+  1,1,1,0,1,
+  0,0,0,0,1,
+  1,1,1,1,1,
+}
+
+sprites['incr'] = {
+  0,0,1,0,0,
+  0,1,0,1,0,
+  1,0,0,0,1,
+  0,1,0,1,0,
+  0,0,1,0,0,
+}
+
+sprites['incr'] = {
+  0,0,1,0,0,
+  0,1,0,1,0,
+  1,0,1,0,1,
+  0,1,0,1,0,
+  1,0,0,0,1,
+}
+
+sprites['imaj'] = {
+  0,0,1,0,0,
+  0,1,0,1,0,
+  1,0,0,0,1,
   0,0,0,0,0,
-  0,0,0,0,0,
+  1,1,1,1,1,
+}
+
+sprites['skip'] = {
+  0,0,1,0,0,
+  0,0,1,1,0,
+  1,1,1,0,1,
+  0,0,1,1,0,
+  0,0,1,0,0,
 }
 
 sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
 sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
 sprites['3'] = { 1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
+sprites['5'] = { 1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
 sprites['A'] = { 0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1 }
 sprites['B'] = { 1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0 }
 sprites['C'] = { 0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0 }
@@ -56,24 +113,21 @@ sprites['G'] = { 0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,0 }
 sprites['#'] = { 0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0 }
 sprites['.'] = { 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 }
 
+sprites['flip'] = { 1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1 }
+sprites['mute'] = { 1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1 }
+
 local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
-local playhead = { x = 1, y = 1, o = 1, octave = 3, note = 'C' }
+local playhead = { x = 1, y = 1, o = 1, v = 60 }
 
 local events = {}
 
 local fns = {
   -- FLIP
   flip = {
-    sprite = {
-      0,0,1,0,0,
-      0,1,0,1,0,
-      1,0,0,0,1,
-      0,1,0,1,0,
-      0,0,1,0,0,
-    },
+    sprite = sprites.flip,
     run = function()
     if playhead.o == 0 then
       playhead.o = 2
@@ -84,57 +138,74 @@ local fns = {
     else
       playhead.o = 1
     end
+  end 
+  },
+  -- TURN
+  turn = {
+    sprite = sprites.turn,
+    run = function()
+    playhead.o = (playhead.o + 1) % 4
   end
-},
--- TURN
-turn = {
-  sprite = {
-    0,1,0,1,0,
-    1,1,1,1,1,
-    0,1,0,1,0,
-    1,1,1,1,1,
-    0,1,0,1,0,
   },
-  run = function()
-  playhead.o = (playhead.o + 1) % 4
-end
-},
--- SKIP
-skip = {
-  sprite = {
-    0,0,1,0,0,
-    0,0,1,1,0,
-    1,1,1,0,1,
-    0,0,1,1,0,
-    0,0,1,0,0,
+  -- SKIP
+  skip = {
+    sprite = sprites.skip,
+    run = function()
+      move()
+    end
   },
-  run = function()
-  move()
-end
-},
--- MUTE
-mute = {
-  sprite = {
-    1,0,1,0,1,
-    0,0,0,0,0,
-    1,0,1,0,1,
-    0,0,0,0,0,
-    1,0,1,0,1,
+  -- MUTE
+  mute = {
+    sprite = sprites.mute,
+    run = function()
+      if playhead.mute == true then
+        playhead.mute = false
+      else
+        playhead.mute = true
+      end
+    end
   },
-  run = function()
-  move()
-end
-}
+  -- INCR
+  incr = {
+    sprite = sprites.incr,
+    run = function()
+      playhead.v = (playhead.v + 1) % 127
+    end
+  },
+  -- INCR MAJ
+  imaj = {
+    sprite = sprites.imaj,
+    run = function()
+      playhead.v = get_next_maj(playhead.v)
+    end
+  },
+  -- DECR
+  decr = {
+    sprite = sprites.decr,
+    run = function()
+      playhead.v = (playhead.v - 1) % 127
+    end
+  },
+  -- DEC MAJ
+  dmaj = {
+    sprite = sprites.dmaj,
+    run = function()
+      playhead.v = get_prev_maj(playhead.v)
+    end
+  }
 }
 
 function init()
   -- Make bounds
   template.bounds.x = math.floor(viewport.w/template.size.w)-1
-  template.bounds.y = math.floor(viewport.h/template.size.h)-1
+  template.bounds.y = math.floor(viewport.h/template.size.h)-2
   print('Bounds '..template.bounds.x..','..template.bounds.y)
   -- Events
   move_to(3,3)
-  add_event(15,3,fns.flip)
+  add_event(5,3,fns.incr)
+  add_event(4,3,fns.mute)
+  add_event(7,3,fns.flip)
+  add_event(1,3,fns.flip)
   add_event(10,3,fns.turn)
   add_event(10,2,fns.turn)
   add_event(11,2,fns.flip)
@@ -195,6 +266,18 @@ function move_to(x,y)
   playhead.y = y
 end
 
+function get_octave()
+  return math.floor(playhead.v/12)
+end
+
+function get_note()
+  return notes[playhead.v % 12].name
+end
+
+function get_sharp()
+  return notes[playhead.v % 12].sharp
+end
+
 function run()
   event = get_event(playhead.x,playhead.y)
   if event == nil then return end
@@ -228,6 +311,9 @@ function is_selection(x,y)
 end
 
 function get_sprite(id)
+  if sprites[id] == nil then
+    return sprites['*']
+  end
   return sprites[id]
 end
 
@@ -254,7 +340,7 @@ end
 function draw_tile(x,y)
   event = get_event(x,y)
   if event then
-    draw_sprite(x,y,event.sprite,10,is_selection(x,y))
+    draw_sprite(x,y,event.sprite,15,is_selection(x,y))
   else
     draw_sprite(x,y,sprites['.'],1,is_selection(x,y))
   end
@@ -269,13 +355,47 @@ function draw_grid()
   screen.stroke()
 end
 
+function draw_state()
+  octave = get_octave()
+  note = get_note()
+  sharp = get_sharp()
+  draw_sprite(1,10,get_sprite(octave..''),15,false)
+  draw_sprite(2,10,get_sprite(note..''),15,false)
+  if sharp == true then
+    draw_sprite(3,10,get_sprite('#'),15,false)
+  end
+end
+
 function redraw()
   screen.clear()
   draw_grid()
+  draw_state()
   screen.update()
 end
 
 -- Utils
+
+function get_next_maj(v)
+  note = v % 12
+  if note == 4 or note == 11 then return v + 1 end
+  if note == 0 or note == 1 or note == 2 or note == 5 or note == 6 or note == 7 or note == 8 or note == 9 then return v + 2 end
+  if note == 3 or note == 10 then return v + 3 end
+end
+
+
+notes = {}
+notes[0]  = { name = 'C', sharp = false }
+notes[1]  = { name = 'C', sharp = true  }
+notes[2]  = { name = 'D', sharp = false }
+notes[3]  = { name = 'D', sharp = true  }
+notes[4]  = { name = 'E', sharp = false }
+notes[5]  = { name = 'F', sharp = false }
+notes[6]  = { name = 'F', sharp = true  }
+notes[7]  = { name = 'G', sharp = false }
+notes[8]  = { name = 'G', sharp = true  }
+notes[9]  = { name = 'A', sharp = false }
+notes[10] = { name = 'A', sharp = true  }
+notes[11] = { name = 'B', sharp = false }
 
 function midi_to_hz(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
