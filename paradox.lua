@@ -16,6 +16,8 @@
 
 engine.name = "PolyPerc"
 
+local frame_sent = false
+local sent = null
 local sprites = {}
 
 notes = {}
@@ -98,13 +100,13 @@ local fns = {
   skip = {
     sprite = sprites.skip,
     next = 'mute',
-    run = function() move() end
+    run = function() move(1) end
   },
   -- MUTE
   mute = {
     sprite = sprites.mute,
     next = 'rand',
-    run = function() if playhead.mute == true then playhead.mute = false else playhead.mute = true end end
+    run = function() release() end
   },
   -- RAND
   rand = {
@@ -157,10 +159,11 @@ function init()
   print('Bounds '..template.bounds.x..','..template.bounds.y)
   -- Events
   move_to(3,3)
-  add_event(4,3,fns.ioct)
-  -- add_event(4,3,fns.mute)
-  add_event(5,3,fns.flip)
-  add_event(2,3,fns.flip)
+  add_event(4,3,fns.incr)
+  add_event(5,3,fns.incr)
+  add_event(2,3,fns.decr)
+  add_event(6,3,fns.flip)
+  add_event(1,3,fns.flip)
   add_event(7,4,fns.incr)
   add_event(1,4,fns.imaj)
   add_event(6,5,fns.decr)
@@ -193,10 +196,12 @@ function connect()
 end
 
 function tic()
+  frame_sent = false
   move(1)
   run()
   send()
   playhead.f = playhead.f + 1
+  redraw()
 end
 
 function add_event(x,y,e)
@@ -223,6 +228,7 @@ end
 
 function stop()
   counter:stop()
+  midi_signal_out:note_off(sent,127)
   is_playing = false
   playhead.o = 1
 end
@@ -240,8 +246,22 @@ function incr_fn()
 end
 
 function send()
-  midi_signal_out:note_on(playhead.v,127)
-  midi_signal_out:note_off(playhead.v,127)
+  if sent ~= playhead.v then
+    if sent ~= nil then
+      midi_signal_out:note_off(sent,127)
+    end
+    midi_signal_out:note_on(playhead.v,127)
+    sent = playhead.v
+    engine.hz(midi_to_hz(playhead.v))
+    frame_sent = true
+  end
+end
+
+function release()
+  if sent ~= nil then
+    midi_signal_out:note_off(sent,127)
+  end
+  sent = nil
 end
 
 -- Playhead
@@ -256,7 +276,6 @@ function move(distance)
   else
     playhead.x = (playhead.x - distance) % (template.bounds.x+2)
   end
-  redraw()
 end
 
 function move_to(x,y)
@@ -353,7 +372,7 @@ function draw_state()
   if sharp == true then
     draw_sprite(3,10,get_sprite('#'),15,false)
   end
-  if playhead.f % 8 == 0 then
+  if frame_sent == true then
     draw_sprite(4,10,get_sprite('*'),15,false)
   end
 end
