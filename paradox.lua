@@ -29,7 +29,7 @@ local counter
 local is_playing = true
 
 note = 40
-position = 1
+position = { x = 1, y = 1 }
 step = {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}
 STEPS = 16
 edit = 1
@@ -41,7 +41,7 @@ function top() note = 120 end
 function rand() note = math.random(80) + 40 end
 function metrofast() counter.time = 0.125 end
 function metroslow() counter.time = 0.25 end
-function positionrand() position = math.random(STEPS) end
+function positionrand() position.x = math.random(STEPS) end
 
 act = {inc, dec, bottom, top, rand, metrofast, metroslow, positionrand}
 COMMANDS = 8
@@ -55,8 +55,8 @@ function init()
 end
 
 function count()
-  position = (position % STEPS) + 1
-  act[step[position]]()
+  position.x = (position.x % STEPS) + 1
+  act[step[position.x]]()
   engine.hz(midi_to_hz(note))
   redraw()
 end
@@ -68,7 +68,7 @@ function redraw()
     screen.level((i == edit) and 15 or 2)
     screen.move(i*8-8,40)
     screen.text(label[step[i]])
-    if i == position then
+    if i == position.x then
       screen.move(i*8-8, 45)
       screen.line_rel(6,0)
       screen.stroke()
@@ -90,12 +90,15 @@ function enc(n,d)
 end
 
 function key(n,z)
-  if n == 2 and z == 1 then
+  if z ~= 1 then return end
+
+  if n == 2 then
     toggle_play()
   end
-  if n == 3 and z == 1 then
+  if n == 3 then
     randomize_steps()
   end
+  redraw()
 end
 
 function toggle_play()
