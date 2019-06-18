@@ -40,7 +40,7 @@ sprites[' '] ={
   0,0,0,0,0,
 }
 
-
+sprites['0'] = { 0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0 }
 sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
 sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
 sprites['3'] = { 1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
@@ -72,6 +72,7 @@ sprites['turn'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0 }
 sprites['skip'] = { 0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,1,0,0,0,0,1,0,0 }
 sprites['rand'] = { 1,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1 }
 
+local midi_signal_out
 local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
@@ -156,10 +157,10 @@ function init()
   print('Bounds '..template.bounds.x..','..template.bounds.y)
   -- Events
   move_to(3,3)
-  add_event(5,3,fns.incr)
-  add_event(4,3,fns.mute)
-  add_event(7,3,fns.flip)
-  add_event(1,3,fns.flip)
+  add_event(4,3,fns.ioct)
+  -- add_event(4,3,fns.mute)
+  add_event(5,3,fns.flip)
+  add_event(2,3,fns.flip)
   add_event(7,4,fns.incr)
   add_event(1,4,fns.imaj)
   add_event(6,5,fns.decr)
@@ -180,10 +181,15 @@ function init()
 end
 
 function start()
+  connect()
   -- Start
   counter = metro.init(tic, 0.125, -1)
   counter:start()
   redraw()
+end
+
+function connect()
+  midi_signal_out = midi.connect(1)
 end
 
 function tic()
@@ -226,17 +232,16 @@ function incr_fn()
   if selection == nil then
     add_event(playhead.x,playhead.y,fns.flip)
   elseif selection.next == nil then
-    print('clear')
     add_event(playhead.x,playhead.y,nil)
   else
-    print('default',selection.next)
     add_event(playhead.x,playhead.y,fns[selection.next])  
   end
   redraw()
 end
 
 function send()
-  
+  midi_signal_out:note_on(playhead.v,127)
+  midi_signal_out:note_off(playhead.v,127)
 end
 
 -- Playhead
@@ -273,7 +278,6 @@ function enc(n,delta)
   elseif n == 3 then
     playhead.y = clamp(playhead.y + delta,1,template.bounds.y)
   end
-  
   redraw()
 end
 
@@ -364,7 +368,7 @@ end
 -- Playhead Utils
 
 function get_octave()
-  return math.floor((playhead.v + 24)/12)
+  return math.floor((playhead.v)/12)
 end
 
 function get_note()
