@@ -14,15 +14,6 @@
 -- ENC 3 - choose command
 -- KEY 3 - randomize command set
 
--- + = increase note
--- - = decrease note
--- < = go to bottom note
--- > = go to top note
--- * = random note
--- M = fast metro
--- m = slow metro
--- # = jump random position
-
 engine.name = "PolyPerc"
 
 local sprites = {}
@@ -49,21 +40,6 @@ sprites[' '] ={
   0,0,0,0,0,
 }
 
-sprites['*'] ={
-  1,0,0,0,1,
-  0,1,0,1,0,
-  0,0,1,0,0,
-  0,1,0,1,0,
-  1,0,0,0,1,
-}
-
-sprites['skip'] = {
-  0,0,1,0,0,
-  0,0,1,1,0,
-  1,1,1,0,1,
-  0,0,1,1,0,
-  0,0,1,0,0,
-}
 
 sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
 sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
@@ -82,6 +58,7 @@ sprites['F'] = { 1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0 }
 sprites['G'] = { 0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,0 }
 sprites['#'] = { 0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0 }
 sprites['.'] = { 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 }
+sprites['*'] = { 1,0,1,0,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,0,1,0,1 }
 
 sprites['flip'] = { 1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1 }
 sprites['mute'] = { 1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1 }
@@ -92,12 +69,14 @@ sprites['decr'] = { 1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,0 }
 sprites['dmaj'] = { 1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1 }
 sprites['doct'] = { 0,0,1,0,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,0 }
 sprites['turn'] = { 0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0 }
+sprites['skip'] = { 0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,1,0,0,0,0,1,0,0 }
+sprites['rand'] = { 1,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1 }
 
 local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
-local playhead = { x = 1, y = 1, o = 1, v = 60 }
+local playhead = { x = 1, y = 1, o = 1, v = 60, f = 0 }
 local events = {}
 
 local fns = {
@@ -123,44 +102,50 @@ local fns = {
   -- MUTE
   mute = {
     sprite = sprites.mute,
-    next = 'incr',
+    next = 'rand',
     run = function() if playhead.mute == true then playhead.mute = false else playhead.mute = true end end
+  },
+  -- RAND
+  rand = {
+    sprite = sprites.rand,
+    next = 'incr',
+    run = function() move(math.random(8)) end
   },
   -- INCR
   incr = {
     sprite = sprites.incr,
     next = 'imaj',
-    run = function() playhead.v = (playhead.v + 1) % 127 end
+    run = function() playhead.v = ((playhead.v + 1) % 96) end
   },
   -- INCR MAJ
   imaj = {
     sprite = sprites.imaj,
     next = 'ioct',
-    run = function() playhead.v = get_next_maj(playhead.v) end
+    run = function() playhead.v = (get_next_maj(playhead.v) % 96) end
   },
   -- INCR OCT
   ioct = {
     sprite = sprites.ioct,
     next = 'decr',
-    run = function() playhead.v = (playhead.v + 12) % 127 end
+    run = function() playhead.v = ((playhead.v + 12) % 96) end
   },
   -- DECR
   decr = {
     sprite = sprites.decr,
     next = 'dmaj',
-    run = function() playhead.v = (playhead.v - 1) % 127 end
+    run = function() playhead.v = ((playhead.v - 1) % 96) end
   },
   -- DEC MAJ
   dmaj = {
     sprite = sprites.dmaj,
     next = 'doct',
-    run = function() playhead.v = get_prev_maj(playhead.v) end
+    run = function() playhead.v = (get_prev_maj(playhead.v) % 96) end
   },
   -- DECR OCT
   doct = {
     sprite = sprites.doct,
     next = nil,
-    run = function() playhead.v = (playhead.v - 12) % 127 end
+    run = function() playhead.v = ((playhead.v - 12) % 96) end
   },
 }
 
@@ -179,6 +164,7 @@ function init()
   add_event(1,4,fns.imaj)
   add_event(6,5,fns.decr)
   add_event(2,5,fns.dmaj)
+  add_event(7,7,fns.rand)
   add_event(2,3,fns.turn)
   add_event(2,6,fns.turn)
   add_event(6,6,fns.turn)
@@ -201,9 +187,10 @@ function start()
 end
 
 function tic()
-  move()
+  move(1)
   run()
   send()
+  playhead.f = playhead.f + 1
 end
 
 function add_event(x,y,e)
@@ -254,15 +241,15 @@ end
 
 -- Playhead
 
-function move()
+function move(distance)
   if playhead.o == 0 then
-    playhead.y = (playhead.y + 1) % (template.bounds.y+2)
+    playhead.y = (playhead.y + distance) % (template.bounds.y+2)
   elseif playhead.o == 1 then
-    playhead.x = (playhead.x + 1) % (template.bounds.x+2)
+    playhead.x = (playhead.x + distance) % (template.bounds.x+2)
   elseif playhead.o == 2 then
-    playhead.y = (playhead.y - 1) % (template.bounds.y+2)
+    playhead.y = (playhead.y - distance) % (template.bounds.y+2)
   else
-    playhead.x = (playhead.x - 1) % (template.bounds.x+2)
+    playhead.x = (playhead.x - distance) % (template.bounds.x+2)
   end
   redraw()
 end
@@ -362,6 +349,9 @@ function draw_state()
   if sharp == true then
     draw_sprite(3,10,get_sprite('#'),15,false)
   end
+  if playhead.f % 8 == 0 then
+    draw_sprite(4,10,get_sprite('*'),15,false)
+  end
 end
 
 function redraw()
@@ -374,7 +364,7 @@ end
 -- Playhead Utils
 
 function get_octave()
-  return math.floor(playhead.v/12)
+  return math.floor((playhead.v + 24)/12)
 end
 
 function get_note()
