@@ -35,6 +35,14 @@ sprites['*'] ={
   0,0,0,0,0,
 }
 
+sprites['*'] ={
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,1,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+}
+
 sprites['1'] = { 0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 }
 sprites['2'] = { 1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,1,1,1,1 }
 sprites['3'] = { 1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0 }
@@ -46,18 +54,13 @@ sprites['E'] = { 1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1 }
 sprites['F'] = { 1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0 }
 sprites['G'] = { 0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,0 }
 sprites['#'] = { 0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0 }
+sprites['.'] = { 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 }
 
 local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
-local playhead = { x = 1, y = 1, o = 1, octave = 3, note = 'C', sprite = {
-  0,1,1,1,0,
-  1,0,0,0,1,
-  1,0,0,0,1,
-  1,0,0,0,1,
-  0,1,1,1,0,
-} }
+local playhead = { x = 1, y = 1, o = 1, octave = 3, note = 'C' }
 
 local events = {}
 
@@ -176,13 +179,13 @@ end
 
 function move()
   if playhead.o == 0 then
-    playhead.y = (playhead.y + 1) % (template.bounds.y)
+    playhead.y = (playhead.y + 1) % (template.bounds.y+2)
   elseif playhead.o == 1 then
-    playhead.x = (playhead.x + 1) % (template.bounds.x)
+    playhead.x = (playhead.x + 1) % (template.bounds.x+2)
   elseif playhead.o == 2 then
-    playhead.y = (playhead.y - 1) % (template.bounds.y)
+    playhead.y = (playhead.y - 1) % (template.bounds.y+2)
   else
-    playhead.x = (playhead.x - 1) % (template.bounds.x)
+    playhead.x = (playhead.x - 1) % (template.bounds.x+2)
   end
   redraw()
 end
@@ -228,13 +231,19 @@ function get_sprite(id)
   return sprites[id]
 end
 
-function draw_sprite(x,y,sprite)
+function draw_sprite(x,y,sprite,brightness,invert)
+  if brightness then
+    screen.level(brightness)
+  end
+  if invert == true then
+    screen.level(15)
+  end
   for _y = 1,5 do
     for _x = 1,5 do
       id = ((_y-1) * 5) + _x
-      if sprite[id] == 1 then
-        sprite_x = _x + (x * template.size.w)
-        sprite_y = _y + (y * template.size.h)
+      if (sprite[id] == 1 and invert == false) or (sprite[id] == 0 and invert == true)  then
+        sprite_x = _x + ((x-1) * template.size.w)
+        sprite_y = _y + ((y-1) * template.size.h)
         screen.pixel(sprite_x,sprite_y)
       end
     end
@@ -243,35 +252,26 @@ function draw_sprite(x,y,sprite)
 end
 
 function draw_tile(x,y)
-  if is_selection(x,y) then
-    draw_sprite(x,y,playhead.sprite)
-    return
-  end
   event = get_event(x,y)
   if event then
-    draw_sprite(x,y,event.sprite)
+    draw_sprite(x,y,event.sprite,10,is_selection(x,y))
+  else
+    draw_sprite(x,y,sprites['.'],1,is_selection(x,y))
   end
 end
 
 function draw_grid()
-  for x = 1,template.bounds.x do
-    for y = 1,template.bounds.y do
+  for x = 1,template.bounds.x+1 do
+    for y = 1,template.bounds.y+1 do
       draw_tile(x,y)
     end
   end
   screen.stroke()
 end
 
-function draw_state()
-  draw_sprite(0,0,get_sprite('3'))
-  draw_sprite(1,0,get_sprite('C'))
-  draw_sprite(2,0,get_sprite('#'))
-end
-
 function redraw()
   screen.clear()
   draw_grid()
-  draw_state()
   screen.update()
 end
 
