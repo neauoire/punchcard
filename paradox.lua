@@ -29,26 +29,62 @@ local counter
 local is_playing = true
 local viewport = { w = 128, h = 64 }
 local template = { size = { w = 6, h = 6 }, bounds = {} }
-local playhead = { x = 1, y = 1, direction = 0, octave = 3, note = 'C', sprite = {
-      0,0,1,0,0,
-      0,1,0,1,0,
+local playhead = { x = 1, y = 1, o = 1, octave = 3, note = 'C', sprite = {
+      0,1,1,1,0,
       1,0,0,0,1,
-      0,1,0,1,0,
-      0,0,1,0,0,
+      1,0,0,0,1,
+      1,0,0,0,1,
+      0,1,1,1,0,
     } }
 
 local events = {}
+
 local fns = {
+  -- FLIP
   flip = {
     sprite = {
-      0,1,1,1,0,
+      0,0,1,0,0,
+      0,1,0,1,0,
       1,0,0,0,1,
-      1,0,0,0,1,
-      1,0,0,0,1,
-      0,1,1,1,0,
+      0,1,0,1,0,
+      0,0,1,0,0,
     },
     run = function()
-      print('hit')
+      if playhead.o == 0 then
+        playhead.o = 2
+      elseif playhead.o == 1 then
+        playhead.o = 3
+      elseif playhead.o == 2 then
+        playhead.o = 0
+      else
+        playhead.o = 1
+      end
+    end
+  },
+  -- TURN
+  turn = {
+    sprite = {
+      0,0,1,0,0,
+      0,0,1,0,0,
+      1,1,1,0,1,
+      0,0,0,0,0,
+      0,0,1,0,0,
+    },
+    run = function()
+      playhead.o = (playhead.o + 1) % 4
+    end
+  },
+  -- SKIP
+  skip = {
+    sprite = {
+      0,0,1,0,0,
+      0,0,1,1,0,
+      1,1,1,0,1,
+      0,0,1,1,0,
+      0,0,1,0,0,
+    },
+    run = function()
+      move()
     end
   }
 }
@@ -60,13 +96,17 @@ function init()
   print('Bounds '..template.bounds.x..','..template.bounds.y)
   -- Events
   add_event(7,1,fns.flip)
+  add_event(10,1,fns.turn)
+  add_event(10,2,fns.turn)
+  add_event(11,2,fns.flip)
+  add_event(12,2,fns.skip)
   -- Ready
   start()
 end
 
 function start()
   -- Start
-  counter = metro.init(tic, 0.500, -1)
+  counter = metro.init(tic, 0.125, -1)
   counter:start()
   redraw()
 end
@@ -98,7 +138,15 @@ end
 -- Playhead
 
 function move()
-  playhead.x = (playhead.x + 1) % (template.bounds.x)
+  if playhead.o == 0 then
+    playhead.y = (playhead.y + 1) % (template.bounds.y)
+  elseif playhead.o == 1 then
+    playhead.x = (playhead.x + 1) % (template.bounds.x)
+  elseif playhead.o == 2 then
+    playhead.y = (playhead.y - 1) % (template.bounds.y)
+  else
+    playhead.x = (playhead.x - 1) % (template.bounds.x)
+  end
   redraw()
 end
 
