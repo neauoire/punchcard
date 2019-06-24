@@ -22,6 +22,9 @@ function init()
   
   tracker:bind(program,instructions,control)
   control:bind(program,instructions,tracker)
+  instructions:bind(program)
+  
+  instructions:print()
   tracker:play()
 end
 

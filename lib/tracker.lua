@@ -44,7 +44,7 @@ end
 
 Tracker.mod_length = function(self,delta)
   if #self.program.data <= 1 and delta == -1 then return end
-  if #self.program.data >= 32 and delta == 1 then return end
+  if #self.program.data >= 16 and delta == 1 then return end
   
   if delta == 1 then
     table.insert(self.program.data, 0)
@@ -113,7 +113,7 @@ Tracker.redraw = function(self)
     self:draw_fn(self.frame + y + length - 2,y)
   end
   for y=1,9 do
-    self:draw_fn(self.focus + y + length - 2,y,60)
+    self:draw_fn(self.focus + y + length - 2,y,66)
   end
   screen.update()
 end
