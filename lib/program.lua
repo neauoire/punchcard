@@ -1,7 +1,7 @@
 
 local program = {}
 
-program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0, 0,0,0,0 }
+program.data = { 0,1,2,3, 0,0,0,0 } -- , 0,0,0,0, 0,0,0,0
 
 program.init = function()
   print('Program','Init')
@@ -31,7 +31,6 @@ program.print = function(self)
 end
 
 program.get_fn_num = function(self,id)
-  print(id)
   return self.data[id]
 end
 

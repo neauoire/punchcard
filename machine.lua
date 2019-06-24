@@ -49,7 +49,10 @@ end
 -- Interactions
 
 function key(id,state)
-  print('key',id,state)
+  if state ~= 1 then return end
+  if id == 3 then
+    tracker:toggle_play()
+  end
 end
 
 function enc(id,delta)
