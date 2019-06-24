@@ -58,7 +58,6 @@ function key(id,state)
 end
 
 function enc(id,delta)
-  print('enc',id,delta)
   if id == 3 then
     tracker:mod_focus(delta)
     redraw()

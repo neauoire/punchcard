@@ -1,13 +1,17 @@
 
 local program = {}
 
-program.data = { 0,1,2,3, 0,0,0,0 } -- , 0,0,0,0, 0,0,0,0
+program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0 } -- ,  0,0,0,0
 
 program.init = function()
   print('Program','Init')
 end
 
 program.swap = function(self,x,y)
+  if x > #self.data then
+    print('Out of bounds')
+    return
+  end
   bit = self:get(x,y)
   if bit == '1' then
     self:set(x,y,'0')

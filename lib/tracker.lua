@@ -62,11 +62,14 @@ tracker.draw_fn = function(self,id,line,offset)
   if self.playhead == id then
     screen.move(0 + offset,y)
     screen.text('>')
+  elseif self.focus == id then
+    screen.move(0 + offset,y)
+    screen.text('*')
   end
   
   screen.move(6 + offset,y)
   screen.text(id)
-  screen.move(12 + offset,y)
+  screen.move(16 + offset,y)
   screen.text(num)
   screen.move(34 + offset,y)
   screen.text(name)
@@ -82,13 +85,14 @@ tracker.draw_header = function(self)
 end
 
 tracker.redraw = function(self)
+  length = #self.program.data
   screen.clear()
   self:draw_header()
   for y=1,9 do
-    self:draw_fn(self.frame + y + 1,y)
+    self:draw_fn(self.frame + y + length - 2,y)
   end
   for y=1,9 do
-    self:draw_fn(self.focus + y + 1,y,60)
+    self:draw_fn(self.focus + y + length - 2,y,60)
   end
   screen.update()
 end
