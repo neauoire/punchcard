@@ -75,11 +75,14 @@ Instructions.make_name = function(self,num)
   
   -- Clamp
   if string.sub(bin, 2,2) == '1' and string.sub(bin, 6,6) == '1' then
-    name = name..'CL' -- Mod Note x 2
-  end
-  
+    name = name..'CL' -- Clamp
+    if string.sub(bin, 3,3) == '1' then
+      name = name..'MX' -- Clamp
+    elseif string.sub(bin, 5,5) == '1' then
+      name = name..'MN' -- Clamp
+    end
   -- Target
-  if string.sub(bin, 5,6) == '11' then
+  elseif string.sub(bin, 5,6) == '11' then
     name = name..'N2' -- Mod Note x 2
   elseif string.sub(bin, 4,5) == '11' then
     name = name..'M2' -- Mod Major x 2
