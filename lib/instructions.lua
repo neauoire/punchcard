@@ -4,8 +4,7 @@ local Instructions = {}
 Instructions.dict = {}
 Instructions.dict[0] = {
   name = '',
-  run = function()
-  end
+  run = function()end
 }
 
 -- 
@@ -92,10 +91,22 @@ Instructions.make_name = function(self,num)
     name = name..'O' -- Mod Octave
   elseif string.sub(bin,3,3) == '1' then
     name = name..'R' -- Mod Rate
+  elseif string.sub(bin,2,2) == '1' then
+    name = name..'S' -- Mod Speed
   end
+  
+  -- Clamp/Range
+  -- Resets
 
   if string.sub(bin, 1,1) == '1' then
     name = name..'P' -- Play Mode
+  end
+  
+  if string.sub(bin, 1,8) == '00000000' then
+    name = 'VOID' -- Play Mode
+  end
+  if string.sub(bin, 1,8) == '11111111' then
+    name = 'NULL' -- Play Mode
   end
   
   return name
