@@ -85,9 +85,9 @@ Tracker.draw_fn = function(self,id,line,offset)
   
   screen.move(6 + offset,y)
   screen.text(id)
-  screen.move(17 + offset,y)
+  screen.move(15 + offset,y)
   screen.text(num)
-  screen.move(33 + offset,y)
+  screen.move(30 + offset,y)
   screen.text(name)
   screen.fill()
 end
@@ -97,10 +97,10 @@ Tracker.draw_header = function(self)
   -- Player
   screen.move(6,7)
   screen.text(self.playhead)
-  screen.move(17,7)
+  screen.move(15,7)
   screen.text(#self.program.data)
   -- Operation
-  screen.move(33,7)
+  screen.move(30,7)
   screen.text(self.operation.root..'('..self.operation.offset..')'..' <'..self.operation.range.from..','..self.operation.range.to..'>'..' '..self.operation.rate..' '..self.operation.speed)
   screen.fill()
 end

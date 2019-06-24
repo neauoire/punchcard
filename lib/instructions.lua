@@ -73,6 +73,11 @@ Instructions.make_name = function(self,num)
     name = 'DEC' -- Decrement
   end
   
+  -- Clamp
+  if string.sub(bin, 2,2) == '1' and string.sub(bin, 6,6) == '1' then
+    name = name..'CL' -- Mod Note x 2
+  end
+  
   -- Target
   if string.sub(bin, 5,6) == '11' then
     name = name..'N2' -- Mod Note x 2
