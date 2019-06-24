@@ -52,13 +52,9 @@ end
 
 Control.draw_program = function(self)
   g:all(0)
-  -- Playhead
-  for y=1,8 do
-    g:led(self.tracker.playhead,y,3)
-  end
-  -- Focus
   for y=1,8 do
     g:led(self.tracker.focus,y,2)
+    g:led(self.tracker.playhead,y,3)
   end
   -- Program
   for x=1,#self.program.data do

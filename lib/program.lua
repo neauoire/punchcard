@@ -1,7 +1,7 @@
 
 local Program = {}
 
-Program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0 } -- ,  0,0,0,0
+Program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0, 0,0,0,0 }
 
 Program.init = function(self)
   print('Program','Init')

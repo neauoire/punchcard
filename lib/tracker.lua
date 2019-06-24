@@ -5,6 +5,7 @@ Tracker.focus = 1
 Tracker.frame = 1
 Tracker.playhead = 1
 Tracker.is_playing = false
+Tracker.operation = { root = 60, offset = 0, range = { from = 0, to = 127 }, rate = 1, speed = 1}
 Tracker.metro = metro.init()
 
 Tracker.init = function(self)
@@ -41,6 +42,17 @@ Tracker.set_bpm = function(self,bpm)
   self.metro.time = 60 / (bpm*4)
 end
 
+Tracker.mod_length = function(self,delta)
+  if #self.program.data <= 1 and delta == -1 then return end
+  if #self.program.data >= 32 and delta == 1 then return end
+  
+  if delta == 1 then
+    table.insert(self.program.data, 0)
+  elseif delta == -1 then
+    table.remove(self.program.data)
+  end
+end
+
 Tracker.mod_focus = function(self,delta)
   self.focus = clamp(self.focus + delta, 1, #self.program.data)
 end
@@ -60,6 +72,7 @@ Tracker.draw_fn = function(self,id,line,offset)
   name = self.instructions:get_name(num)
   
   screen.level(5)
+  
   if self.playhead == id then
     screen.move(0 + offset,y)
     screen.level(15)
@@ -72,19 +85,23 @@ Tracker.draw_fn = function(self,id,line,offset)
   
   screen.move(6 + offset,y)
   screen.text(id)
-  screen.move(16 + offset,y)
+  screen.move(17 + offset,y)
   screen.text(num)
-  screen.move(34 + offset,y)
+  screen.move(33 + offset,y)
   screen.text(name)
   screen.fill()
 end
 
 Tracker.draw_header = function(self)
   screen.level(15)
+  -- Player
   screen.move(6,7)
   screen.text(self.playhead)
-  screen.move(16,7)
-  screen.text(self.frame)
+  screen.move(17,7)
+  screen.text(#self.program.data)
+  -- Operation
+  screen.move(33,7)
+  screen.text(self.operation.root..'('..self.operation.offset..')'..' <'..self.operation.range.from..','..self.operation.range.to..'>'..' '..self.operation.rate..' '..self.operation.speed)
   screen.fill()
 end
 
@@ -109,8 +126,19 @@ Tracker.update = function(self)
   self.playhead = (self.playhead % #self.program.data)+1
 end
 
+Tracker.run = function(self)
+  num = self.program:get_fn_num(self.playhead)
+  fn = self.instructions:get_fn(num)
+  if fn and fn.run then
+    fn.run(self.operation)  
+  else
+    print(num..' is missing run phase')
+  end
+end
+
 Tracker.metro.event = function()
   Tracker:update()
+  Tracker:run()
 end
 
 -- Utils
