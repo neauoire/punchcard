@@ -1,35 +1,35 @@
 
-local tracker = {}
+local Tracker = {}
 
-tracker.focus = 1
-tracker.frame = 1
-tracker.playhead = 1
-tracker.is_playing = false
-tracker.metro = metro.init()
+Tracker.focus = 1
+Tracker.frame = 1
+Tracker.playhead = 1
+Tracker.is_playing = false
+Tracker.metro = metro.init()
 
-tracker.init = function(self)
+Tracker.init = function(self)
   print('Tracker','Init')
   self:set_bpm(120)
   self.metro:start()
 end
 
-tracker.bind = function(self,program,instructions)
-  print('Tracker',program:print())
+Tracker.bind = function(self,program,instructions,control)
   self.program = program
   self.instructions = instructions
+  self.control = control
 end
 
-tracker.play = function(self)
+Tracker.play = function(self)
   print('Tracker','play')
   self.is_playing = true
 end
 
-tracker.stop = function(self)
+Tracker.stop = function(self)
   print('Tracker','stop')
   self.is_playing = false
 end
 
-tracker.toggle_play = function(self)
+Tracker.toggle_play = function(self)
   if self.is_playing == true then
     self:stop()
   else
@@ -37,21 +37,21 @@ tracker.toggle_play = function(self)
   end
 end
 
-tracker.set_bpm = function(self,bpm)
+Tracker.set_bpm = function(self,bpm)
   self.metro.time = 60 / (bpm*4)
 end
 
-tracker.mod_focus = function(self,delta)
-  self.focus = (self.focus + delta)
+Tracker.mod_focus = function(self,delta)
+  self.focus = clamp(self.focus + delta, 1, #self.program.data)
 end
 
-tracker.set_focus = function(self,id)
+Tracker.set_focus = function(self,id)
   self.focus = id
 end
 
 -- Render
 
-tracker.draw_fn = function(self,id,line,offset)
+Tracker.draw_fn = function(self,id,line,offset)
   offset = offset or 0
   
   y = (6 * line)+10
@@ -59,11 +59,14 @@ tracker.draw_fn = function(self,id,line,offset)
   num = self.program:get_fn_num(id)
   name = self.instructions:get_name(num)
   
+  screen.level(5)
   if self.playhead == id then
     screen.move(0 + offset,y)
+    screen.level(15)
     screen.text('>')
   elseif self.focus == id then
     screen.move(0 + offset,y)
+    screen.level(10)
     screen.text('*')
   end
   
@@ -73,18 +76,19 @@ tracker.draw_fn = function(self,id,line,offset)
   screen.text(num)
   screen.move(34 + offset,y)
   screen.text(name)
-end
-
-tracker.draw_header = function(self)
-  screen.level(15)
-  screen.move(100,7)
-  screen.text(self.frame)
-  screen.move(80,7)
-  screen.text(self.playhead)
   screen.fill()
 end
 
-tracker.redraw = function(self)
+Tracker.draw_header = function(self)
+  screen.level(15)
+  screen.move(6,7)
+  screen.text(self.playhead)
+  screen.move(16,7)
+  screen.text(self.frame)
+  screen.fill()
+end
+
+Tracker.redraw = function(self)
   length = #self.program.data
   screen.clear()
   self:draw_header()
@@ -97,15 +101,22 @@ tracker.redraw = function(self)
   screen.update()
 end
 
-tracker.update = function(self)
+Tracker.update = function(self)
   if self.is_playing == false then return end
   self:redraw()
+  self.control:redraw()
   self.frame = self.frame + 1
   self.playhead = (self.playhead % #self.program.data)+1
 end
 
-tracker.metro.event = function()
-  tracker:update()
+Tracker.metro.event = function()
+  Tracker:update()
 end
 
-return tracker
+-- Utils
+
+function clamp(val,min,max)
+  return val < min and min or val > max and max or val
+end
+
+return Tracker

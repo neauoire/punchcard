@@ -1,17 +1,26 @@
-local instructions = {}
 
-instructions.dict = {}
+local Instructions = {}
 
-instructions.dict[1] = {
+Instructions.dict = {}
+
+Instructions.dict[1] = {
   name = 'INCR'
 }
 
-instructions.get_name = function(self,num)
-  if instructions.dict[num] then
-    return instructions.dict[num].name
+Instructions.dict[2] = {
+  name = 'DECR'
+}
+
+Instructions.init = function(self)
+  print('Instructions','Init')
+end
+
+Instructions.get_name = function(self,num)
+  if self.dict[num] then
+    return self.dict[num].name
   else
     return '?'
   end
 end
 
-return instructions
+return Instructions

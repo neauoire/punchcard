@@ -1,13 +1,13 @@
 
-local program = {}
+local Program = {}
 
-program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0 } -- ,  0,0,0,0
+Program.data = { 0,1,2,3, 0,0,0,0, 0,0,0,0 } -- ,  0,0,0,0
 
-program.init = function()
+Program.init = function(self)
   print('Program','Init')
 end
 
-program.swap = function(self,x,y)
+Program.swap = function(self,x,y)
   if x > #self.data then
     print('Out of bounds')
     return
@@ -20,25 +20,25 @@ program.swap = function(self,x,y)
   end
 end
 
-program.get = function(self,x,y)
+Program.get = function(self,x,y)
   return self:to_bin(self.data[x]):sub(y,y)
 end
 
-program.set = function(self,x,y,z)
+Program.set = function(self,x,y,z)
   bits = self:to_bin(self.data[x])
   mod_bits = replace_char(bits,y,z)
   self.data[x] = self:to_num(mod_bits)
 end
 
-program.print = function(self)
+Program.print = function(self)
   print(table.concat(self.data))
 end
 
-program.get_fn_num = function(self,id)
+Program.get_fn_num = function(self,id)
   return self.data[id]
 end
 
-program.get_fn_bin = function(self,id)
+Program.get_fn_bin = function(self,id)
   return self:to_bin(self:get_fn_num(id))
 end
 
@@ -48,7 +48,7 @@ function replace_char(str, pos, r)
   return str:sub(1, pos-1) .. r .. str:sub(pos+1)
 end
 
-program.to_num = function(self,bin)
+Program.to_num = function(self,bin)
   bin = string.reverse(bin)
   local sum = 0
   for i = 1, string.len(bin) do
@@ -58,7 +58,7 @@ program.to_num = function(self,bin)
   return math.floor(sum)
 end
 
-program.to_bin = function(self,num)
+Program.to_bin = function(self,num)
   local t={}
   for b=8,1,-1 do
     rest=math.fmod(num,2)
@@ -68,4 +68,4 @@ program.to_bin = function(self,num)
   return table.concat(t)
 end
 
-return program
+return Program
