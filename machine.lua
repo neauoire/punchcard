@@ -24,7 +24,7 @@ function init()
   control:bind(program,instructions,tracker)
   instructions:bind(program)
   
-  instructions:print()
+  instructions:build()
   tracker:play()
 end
 

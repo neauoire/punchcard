@@ -2,170 +2,9 @@
 local Instructions = {}
 
 Instructions.dict = {}
-
 Instructions.dict[0] = {
   name = '',
-  run = function() end
-}
-
-Instructions.dict[1] = {
-  name = 'INCR',
-  run = function(operation)
-    operation.offset = mod_offset(operation,1)
-  end
-}
-
-Instructions.dict[2] = {
-  name = 'DECR',
-  run = function(operation)
-    operation.offset = mod_offset(operation,-1)
-  end
-}
-
-Instructions.dict[3] = {
-  name = 'INCR2',
-  run = function(operation)
-    operation.offset = mod_offset(operation,-2)
-  end
-}
-
-Instructions.dict[5] = {
-  name = 'INCRM',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[6] = {
-  name = 'DECR2',
-  run = function(operation)
-    operation.offset = operation.offset - 2
-  end
-}
-
-Instructions.dict[7] = {
-  name = 'REST', 
-  run = function(operation)
-    operation.offset = 0
-  end
-}
-
-Instructions.dict[9] = {
-  name = 'INCRO',
-  run = function(operation)
-    operation.offset = mod_offset(operation,12)
-  end
-}
-
-Instructions.dict[10] = {
-  name = 'DECRM',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[11] = {
-  name = 'RESTM', 
-  docs = 'Go to nearest major',
-  run = function(operation)
-    operation.offset = 0
-  end
-}
-
-Instructions.dict[13] = {
-  name = 'INCRM2',
-  run = function(operation)
-    operation.offset = mod_offset_major(operation,-2)
-  end
-}
-
-Instructions.dict[17] = {
-  name = 'INCRS2',
-  docs = 'Increase speed to 2',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[18] = {
-  name = 'DECRO',
-  run = function(operation)
-    operation.offset = mod_offset(operation,-12)
-  end
-}
-
-Instructions.dict[19] = {
-  name = 'RESTO', 
-  docs = 'Go to nearest octave',
-  run = function(operation)
-    operation.offset = 0
-  end
-}
-
-Instructions.dict[25] = {
-  name = 'INCRO2',
-  run = function(operation)
-    operation.offset = mod_offset(operation,24)
-  end
-}
-
-Instructions.dict[26] = {
-  name = 'DECRM2',
-  run = function(operation)
-    operation.offset = mod_offset_major(operation,-2)
-  end
-}
-
-Instructions.dict[34] = {
-  name = 'DECRS4',
-  docs = 'Decrease speed to 2',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[35] = {
-  name = 'RESTS', 
-  docs = 'Reset speed',
-  run = function(operation)
-    operation.offset = 0
-  end
-}
-
-Instructions.dict[49] = {
-  name = 'INCRS4',
-  docs = 'Increase speed to 4',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[50] = {
-  name = 'DECRO2',
-  run = function(operation)
-    operation.offset = mod_offset(operation,-24)
-  end
-}
-
-Instructions.dict[98] = {
-  name = 'DECRS4',
-  docs = 'Decrease speed to 1/4',
-  run = function(operation)
-    operation.offset = operation.offset - 1
-  end
-}
-
-Instructions.dict[128] = {
-  name = 'PLAY',
-  run = function(operation)
-    
-  end
-}
-
-Instructions.dict[129] = {
-  name = 'INCRP',
-  run = function(operation)
-    operation.offset = mod_offset(operation,1)
+  run = function()
   end
 }
 
@@ -193,6 +32,20 @@ Instructions.bind = function(self,program)
   self.program = program
 end
 
+Instructions.build = function(self)
+  for num=1,255 do
+    self.dict[num] = {
+      name = self:make_name(num),
+      run = function() end
+    }
+  end
+  -- Overrides
+  self.dict[128] = {
+    name = 'PLAY',
+    run = function() end
+  }
+end
+
 Instructions.get_name = function(self,num)
   if self:get_fn(num) then
     return self:get_fn(num).name
@@ -205,6 +58,49 @@ Instructions.get_fn = function(self,num)
   return self.dict[num]
 end
 
+Instructions.make_name = function(self,num)
+  bin = self.program:to_bin(num)
+  name = ''
+  
+  -- Cmd
+  if string.sub(bin, 7,8) == '11' then
+    name = 'RDM' -- Random
+  elseif string.sub(bin, 7,8) == '00' then
+    name = 'SET' -- Set
+    
+  elseif string.sub(bin, 8,8) == '1' then
+    name = 'INC' -- Increment
+  elseif string.sub(bin, 8,8) == '0' then
+    name = 'DEC' -- Decrement
+  end
+  
+  -- Target
+  if string.sub(bin, 5,6) == '11' then
+    name = name..'N2' -- Mod Note x 2
+  elseif string.sub(bin, 4,5) == '11' then
+    name = name..'M2' -- Mod Major x 2
+  elseif string.sub(bin, 3,4) == '11' then
+    name = name..'O2' -- Mod Octave x 2
+  elseif string.sub(bin, 2,3) == '11' then
+    name = name..'R2' -- Mod Rate x 2
+    
+  elseif string.sub(bin,6,6) == '1' then
+    name = name..'N' -- Mod Note
+  elseif string.sub(bin,5,5) == '1' then
+    name = name..'M' -- Mod Major
+  elseif string.sub(bin,4,4) == '1' then
+    name = name..'O' -- Mod Octave
+  elseif string.sub(bin,3,3) == '1' then
+    name = name..'R' -- Mod Rate
+  end
+
+  if string.sub(bin, 1,1) == '1' then
+    name = name..'P' -- Play Mode
+  end
+  
+  return name
+end
+
 Instructions.print = function(self)
   html = ''
   count = 0 
@@ -213,6 +109,7 @@ Instructions.print = function(self)
       print(self.program:to_bin(num)..' '..self:get_name(num))
       count = count + 1
     end
+    print(self:make_name(num))
   end
   print(count..' instructions, '..math.floor((count/255)*100)..'%')
 end
