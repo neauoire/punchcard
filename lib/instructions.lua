@@ -102,15 +102,20 @@ Instructions.make_name = function(self,num)
 end
 
 Instructions.print = function(self)
-  html = ''
-  count = 0 
-  for num=1,255 do
-    if self:get_fn(num) then
-      print(self.program:to_bin(num)..' '..self:get_name(num))
-      count = count + 1
-    end
-    print(self:make_name(num))
+  collection = {}
+  
+  for id=1,#self.dict do
+    name = self.dict[id].name
+    collection[name] = id
   end
+  
+  count = 0
+  for k, v in pairs(collection) do
+    bin = self.program:to_bin(v)
+    print(bin..' '..k)
+    count = count + 1
+  end
+
   print(count..' instructions, '..math.floor((count/255)*100)..'%')
 end
 

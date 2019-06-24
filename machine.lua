@@ -25,6 +25,7 @@ function init()
   instructions:bind(program)
   
   instructions:build()
+  instructions:print()
   tracker:play()
 end
 
