@@ -8,6 +8,7 @@
 --
 
 local program = include('lib/program')
+local instructions = include('lib/instructions')
 local tracker = include('lib/tracker')
 
 -- Main
@@ -15,9 +16,9 @@ local tracker = include('lib/tracker')
 function init()
   program:init()
   tracker:init()
-  tracker:bind(program)
+  tracker:bind(program,instructions)
   connect()
-  redraw()
+  tracker:play()
 end
 
 function connect()
@@ -34,6 +35,7 @@ end
 function on_grid_key(x,y,z)
   if z == 1 then
     program:swap(x,y)
+    tracker:set_focus(x)
     redraw()
   end
 end
@@ -57,6 +59,10 @@ end
 
 function enc(id,delta)
   print('enc',id,delta)
+  if id == 3 then
+    tracker:mod_focus(delta)
+    redraw()
+  end
 end
 
 -- Render

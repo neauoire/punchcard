@@ -1,10 +1,10 @@
 
 local tracker = {}
 
+tracker.focus = 1
 tracker.frame = 1
 tracker.playhead = 1
 tracker.is_playing = false
-
 tracker.metro = metro.init()
 
 tracker.init = function(self)
@@ -13,29 +13,10 @@ tracker.init = function(self)
   self.metro:start()
 end
 
-tracker.bind = function(self,program)
+tracker.bind = function(self,program,instructions)
   print('Tracker',program:print())
   self.program = program
-end
-
-tracker.draw_fn = function(self,id,line)
-  screen.move(0,(8 * line)+8)
-  id = (id % #self.program.data)+1
-  screen.text(id)
-  screen.move(12,(8 * line)+8)
-  screen.text(self.program:get_fn_num(id))
-end
-
-tracker.redraw = function(self)
-  screen.clear()
-  screen.rect(0,8,128,7)
-  screen.fill()
-  for y=1,7 do
-    self:draw_fn(self.frame + y,y)
-  end
-  screen.move(100,7)
-  screen.text(self.frame)
-  screen.update()
+  self.instructions = instructions
 end
 
 tracker.play = function(self)
@@ -57,10 +38,63 @@ tracker.toggle_play = function(self)
 end
 
 tracker.set_bpm = function(self,bpm)
-  self.metro.time = 60 / (bpm*2)
+  self.metro.time = 60 / (bpm*4)
+end
+
+tracker.mod_focus = function(self,delta)
+  self.focus = (self.focus + delta)
+end
+
+tracker.set_focus = function(self,id)
+  self.focus = id
+end
+
+-- Render
+
+tracker.draw_fn = function(self,id,line,offset)
+  offset = offset or 0
+  
+  y = (6 * line)+10
+  id = (id % #self.program.data)+1
+  num = self.program:get_fn_num(id)
+  name = self.instructions:get_name(num)
+  
+  if self.playhead == id then
+    screen.move(0 + offset,y)
+    screen.text('>')
+  end
+  
+  screen.move(6 + offset,y)
+  screen.text(id)
+  screen.move(12 + offset,y)
+  screen.text(num)
+  screen.move(34 + offset,y)
+  screen.text(name)
+end
+
+tracker.draw_header = function(self)
+  screen.level(15)
+  screen.move(100,7)
+  screen.text(self.frame)
+  screen.move(80,7)
+  screen.text(self.playhead)
+  screen.fill()
+end
+
+tracker.redraw = function(self)
+  screen.clear()
+  self:draw_header()
+  for y=1,9 do
+    self:draw_fn(self.frame + y + 1,y)
+  end
+  for y=1,9 do
+    self:draw_fn(self.focus + y + 1,y,60)
+  end
+  screen.update()
 end
 
 tracker.update = function(self)
+  if self.is_playing == false then return end
   self:redraw()
   self.frame = self.frame + 1
   self.playhead = (self.playhead % #self.program.data)+1
