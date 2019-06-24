@@ -17,20 +17,35 @@ program.swap = function(self,x,y)
 end
 
 program.get = function(self,x,y)
-  return to_bin(self.data[x]):sub(y,y)
+  return self:to_bin(self.data[x]):sub(y,y)
 end
 
 program.set = function(self,x,y,z)
-  bits = to_bin(self.data[x])
+  bits = self:to_bin(self.data[x])
   mod_bits = replace_char(bits,y,z)
-  self.data[x] = to_num(mod_bits)
+  self.data[x] = self:to_num(mod_bits)
 end
+
+program.print = function(self)
+  print(table.concat(self.data))
+end
+
+program.get_fn_num = function(self,id)
+  print(id)
+  return self.data[id]
+end
+
+program.get_fn_bin = function(self,id)
+  return self:to_bin(self:get_fn_num(id))
+end
+
+-- Utils
 
 function replace_char(str, pos, r)
   return str:sub(1, pos-1) .. r .. str:sub(pos+1)
 end
 
-function to_num(bin)
+program.to_num = function(self,bin)
   bin = string.reverse(bin)
   local sum = 0
   for i = 1, string.len(bin) do
@@ -40,7 +55,7 @@ function to_num(bin)
   return math.floor(sum)
 end
 
-function to_bin(num)
+program.to_bin = function(self,num)
   local t={}
   for b=8,1,-1 do
     rest=math.fmod(num,2)

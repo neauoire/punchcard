@@ -79,9 +79,9 @@ function draw_program()
 end
 
 function redraw()
-  tab.print(program)
   screen.clear()
   draw_program()
+  tracker:redraw()
   screen.update()
 end
 
