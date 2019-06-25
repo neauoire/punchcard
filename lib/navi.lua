@@ -83,9 +83,20 @@ end
 -- 
 
 Navi.view_card = function(self)
-  screen.move(10,10)
+  screen.move(100,10)
   screen.text(Navi.card)
   screen.fill()
+  count = 1
+  for l=1,16 do
+    line = self.stack:get_line(self.card,l)
+    bin = line_to_bin(line)
+    num = bin_to_num(bin)
+    if num > 0 then
+      screen.move(0,count*6)
+      screen.text('> '..l..' '..num)
+      count = count + 1
+    end
+  end
 end
 
 Navi.view_home = function(self)
@@ -98,13 +109,10 @@ end
 
 Navi.toggle = function(self,id)
   if self:in_card() ~= true then print('Not in a card') ; return end
-  print('toggle '..id)
   is_light = self.stack:read(self.card,id)
   if is_light == true then
-    print('turn off')
     self.stack:write(self.card,id,false)
   else
-    print('turn on')
     self.stack:write(self.card,id,true)
   end
   self:redraw()
