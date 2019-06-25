@@ -43,17 +43,15 @@ Stack.get_line = function(self,id,line_id)
   for y=1,8 do
     table.insert(res,self:read(id,id_at(line_id,y)))
   end
-  return res
+  bin = line_to_bin(res)
+  num = bin_to_num(bin)
+  return self.instruct:get_name(num)
 end
 
 Stack.get_program = function(self,id)
   str = ''
-  print(id)
   for y=1,16 do
-    line = self:get_line(id,y)
-    bin = line_to_bin(line)
-    num = bin_to_num(bin)
-    name = self.instruct:get_name(num)
+    name = self:get_line(id,y)
     if name ~= '' and name ~= '--' then
       str = str..name..';'
     end

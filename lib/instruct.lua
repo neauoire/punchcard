@@ -80,7 +80,7 @@ Instruct.build_if = function(self,id,bin)
   else
     _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'IF '.._type..'='.._value }
+  self.dict[id] = { name = 'IF '.._type..' = '.._value }
 end
 
 Instruct.build_set = function(self,id,bin)
@@ -92,13 +92,13 @@ Instruct.build_set = function(self,id,bin)
   else
     _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'SET '.._type..'='.._value }
+  self.dict[id] = { name = 'SET '.._type..' = '.._value }
 end
 
 Instruct.build_send = function(self,id,bin)
   _type = self:make_send_type(id,bin)
   _value = self:make_number(id,bin)
-  self.dict[id] = { name = 'SEND '.._type..'='.._value }
+  self.dict[id] = { name = 'SEND '.._type..' > '.._value }
 end
 
 Instruct.build = function(self)
