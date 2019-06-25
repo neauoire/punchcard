@@ -22,6 +22,7 @@ function init()
   screen.line_width(1)
   
   navi:start()
+  test = 'hello'
 end
 
 -- Interactions
@@ -103,3 +104,9 @@ function num_to_bin(num)
   end
   return table.concat(t)
 end
+
+function char_at(str,index,length)
+  length = length or 1
+  return string.sub(bin,index,index+length-1)
+end
+
