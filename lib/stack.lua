@@ -8,6 +8,10 @@ Stack.init = function(self)
   self:build()
 end
 
+Stack.bind = function(self,instruct)
+  self.instruct = instruct
+end
+
 Stack.build = function(self)
   self.cards = {}
   for x=1,16 do
@@ -40,6 +44,21 @@ Stack.get_line = function(self,id,line_id)
     table.insert(res,self:read(id,id_at(line_id,y)))
   end
   return res
+end
+
+Stack.get_program = function(self,id)
+  str = ''
+  print(id)
+  for y=1,16 do
+    line = self:get_line(id,y)
+    bin = line_to_bin(line)
+    num = bin_to_num(bin)
+    name = self.instruct:get_name(num)
+    if name ~= '' and name ~= '--' then
+      str = str..name..';'
+    end
+  end
+  return str
 end
 
 Stack.get_card = function(self,id)

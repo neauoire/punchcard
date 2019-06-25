@@ -11,7 +11,7 @@ Navi.init = function(self)
 end
 
 Navi.start = function(self)
-  self:set_bpm(120)
+  self:set_bpm(20)
   Navi.metro:start()
   self:redraw()
 end
@@ -151,6 +151,11 @@ Navi.toggle = function(self,id)
 end
 
 Navi.run = function(self)
+  for id=1,128 do
+    if self.stack:known(id) == true then
+      print(self.stack:get_program(id))
+    end
+  end
   self:redraw()
   self.frame = self.frame + 1
 end

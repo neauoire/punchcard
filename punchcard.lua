@@ -12,6 +12,7 @@ function init()
   navi:init()
   instruct:init()
   navi:bind(stack,instruct)
+  stack:bind(instruct)
   -- Render Style
   screen.level(15)
   screen.aa(0)
