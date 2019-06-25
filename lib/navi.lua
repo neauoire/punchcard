@@ -7,8 +7,12 @@ Navi.init = function(self)
   self:connect()
 end
 
-Navi.bind = function(self,program)
-  self.program = program
+Navi.start = function(self)
+  self:redraw()
+end
+
+Navi.bind = function(self,stack)
+  self.stack = stack
 end
 
 Navi.connect = function(self)
@@ -27,14 +31,15 @@ end
 Navi.on_grid_key = function(x,y,z)
   if z == 1 then
     id = id_at(x,y)
-    print(id)
-    pos = pos_at(id)
-    print('id: '..id..' pos: '..pos.x..','..pos.y..' real: '..x..','..y)
-    -- if Navi.card == nil then
-    --   Navi:enter_card(id)
-    -- elseif Navi.card == id then
-    --   Navi:leave_card(id)
-    -- end
+    if Navi:in_card() == true then
+      if Navi.card == id then
+        Navi:leave_card()
+      else
+        Navi:toggle(id)
+      end
+    else
+      Navi:enter_card(id)
+    end
   end
 end
 
@@ -44,6 +49,52 @@ end
 
 Navi.on_grid_remove = function(self,g)
   print('on_remove')
+end
+
+
+Navi.view_card = function(self)
+  -- Active Card
+  pos = pos_at(self.card)
+  g:led(pos.x,pos.y,15)
+  -- Draw Bytes
+  for x=1,16 do
+    for y=1,8 do
+      is_light = self.stack:read(self.card,id_at(x,y))
+      if is_light then
+        g:led(x,y,15)
+      end
+    end
+  end 
+end
+
+Navi.view_home = function(self)
+  
+end
+
+Navi.update_grid = function(self)
+  g:all(0)
+  -- Draw active card
+  if self:in_card() then
+    Navi:view_card()
+  else
+    Navi:view_home()
+  end
+
+  g:refresh()
+end
+
+Navi.toggle = function(self,id)
+  if self:in_card() ~= true then print('Not in a card') ; return end
+  print('toggle '..id)
+  is_light = self.stack:read(self.card,id)
+  if is_light == true then
+    print('turn off')
+    self.stack:write(self.card,id,false)
+  else
+    print('turn on')
+    self.stack:write(self.card,id,true)
+  end
+  self:redraw()
 end
 
 -- 
@@ -60,9 +111,14 @@ Navi.leave_card = function(self)
   Navi:redraw()
 end
 
+Navi.in_card = function(self)
+  return self.card ~= nil
+end
+
 Navi.redraw = function(self)
+  self:update_grid()
   screen.clear()
-  if Navi.card then
+  if self:in_card() then
     screen.move(10,10)
     screen.text(Navi.card)
     screen.fill()
@@ -73,5 +129,6 @@ Navi.redraw = function(self)
   end
   screen.update()
 end
+
 
 return Navi

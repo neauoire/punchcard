@@ -12,12 +12,14 @@ function init()
   stack:init()
   navi:init()
   
+  navi:bind(stack)
+  
   -- Render Style
   screen.level(15)
   screen.aa(0)
   screen.line_width(1)
-  -- Render
-  update()
+  
+  navi:start()
 end
 
 -- Interactions
@@ -52,30 +54,6 @@ function draw_pixel(x,y)
     screen.stroke()
     screen.level(1)
   end
-end
-
-function draw_label()
-  screen.level(15)
-  line_height = 8
-  screen.move(5,viewport.height - (line_height * 1))
-  if navi:is_connected() ~= true then
-    screen.text('Grid is not connected.')
-  else
-    screen.text(focus.x..','..focus.y)
-  end
-  screen.stroke()
-end
-
-function update()
-  redraw()
-end
-
-function redraw()
-  screen.clear()
-  navi:redraw()
-  draw_label()
-  screen.stroke()
-  screen.update()
 end
 
 -- Utils

@@ -1,6 +1,8 @@
 
 local Stack = {}
 
+Stack.cards = {}
+
 Stack.init = function(self)
   print('Control','Init')
   self:build()
@@ -10,9 +12,26 @@ Stack.build = function(self)
   self.cards = {}
   for x=1,16 do
     for y=1,8 do
-      print('Creating card '..x..','..y..' -> ')
+      id = id_at(x,y)
+      self.cards[id] = {}
+      for b=1,96 do
+        self.cards[id][b] = false
+      end
+      print('Creating card '..x..','..y..' -> '..id)
     end
   end
+end
+
+Stack.read = function(self,i,b)
+  return self.cards[i][b]
+end
+
+Stack.write = function(self,i,b,v)
+  self.cards[i][b] = v
+end
+
+Stack.get_card = function(self,id)
+  return self.cards[id]
 end
 
 return Stack
