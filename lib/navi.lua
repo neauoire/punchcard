@@ -51,8 +51,9 @@ Navi.on_grid_remove = function(self,g)
   print('on_remove')
 end
 
+-- 
 
-Navi.view_card = function(self)
+Navi.grid_card = function(self)
   -- Active Card
   pos = pos_at(self.card)
   g:led(pos.x,pos.y,15)
@@ -67,21 +68,33 @@ Navi.view_card = function(self)
   end 
 end
 
+Navi.grid_home = function(self)
+  -- Draw Bytes
+  for x=1,16 do
+    for y=1,8 do
+      is_light = self.stack:known(id_at(x,y))
+      if is_light then
+        g:led(x,y,5)
+      end
+    end
+  end 
+end
+
+-- 
+
+Navi.view_card = function(self)
+  screen.move(10,10)
+  screen.text(Navi.card)
+  screen.fill()
+end
+
 Navi.view_home = function(self)
-  
+  screen.move(10,10)
+  screen.text('home')
+  screen.fill()
 end
 
-Navi.update_grid = function(self)
-  g:all(0)
-  -- Draw active card
-  if self:in_card() then
-    Navi:view_card()
-  else
-    Navi:view_home()
-  end
-
-  g:refresh()
-end
+-- 
 
 Navi.toggle = function(self,id)
   if self:in_card() ~= true then print('Not in a card') ; return end
@@ -116,19 +129,17 @@ Navi.in_card = function(self)
 end
 
 Navi.redraw = function(self)
-  self:update_grid()
+  g:all(0)
   screen.clear()
   if self:in_card() then
-    screen.move(10,10)
-    screen.text(Navi.card)
-    screen.fill()
+    self:grid_card()
+    self:view_card()
   else
-    screen.move(10,10)
-    screen.text('home')
-    screen.fill()
+    self:grid_home()
+    self:view_home()
   end
+  g:refresh()
   screen.update()
 end
-
 
 return Navi

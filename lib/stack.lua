@@ -30,6 +30,11 @@ Stack.write = function(self,i,b,v)
   self.cards[i][b] = v
 end
 
+Stack.known = function(self,id)
+  for b=1,96 do if self.cards[id][b] ~= false then return true end end
+  return false
+end
+
 Stack.get_card = function(self,id)
   return self.cards[id]
 end
