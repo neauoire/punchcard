@@ -20,16 +20,16 @@ end
 
 Instruct.make_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'RATE'
-  elseif char_at(bin,5) == '1' then return 'FRAME'
-  elseif char_at(bin,6) == '1' then return 'OCTAVE'
+  elseif char_at(bin,5) == '1' then return 'STEP'
+  elseif char_at(bin,6) == '1' then return 'OCT'
   else return 'NOTE' end
 end
 
 Instruct.make_send_type = function(self,id,bin)
-  if char_at(bin,5,2) == '11' then return 'SYSTEM'
+  if char_at(bin,5,2) == '11' then return 'SYS'
   elseif char_at(bin,5) == '1' then return 'BANG'
   elseif char_at(bin,6) == '1' then return 'OSC'
-  else return 'CHANNEL' end
+  else return 'CHAN' end
 end
 
 Instruct.make_note = function(self,id,bin)
@@ -80,25 +80,25 @@ Instruct.build_if = function(self,id,bin)
   else
     _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'IF '.._type..' IS '.._value }
+  self.dict[id] = { name = 'IF '.._type..'='.._value }
 end
 
 Instruct.build_set = function(self,id,bin)
   _type = self:make_type(id,bin)
   if _type == 'NOTE' then
     _value = self:make_note(id,bin)
-  elseif _type == 'OCTAVE' then
+  elseif _type == 'OCT' then
     _value = self:make_octave(id,bin)
   else
     _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'SET '.._type..' TO '.._value }
+  self.dict[id] = { name = 'SET '.._type..'='.._value }
 end
 
 Instruct.build_send = function(self,id,bin)
   _type = self:make_send_type(id,bin)
   _value = self:make_number(id,bin)
-  self.dict[id] = { name = 'SEND TO '.._type..' > '.._value }
+  self.dict[id] = { name = 'SEND '.._type..'='.._value }
 end
 
 Instruct.build = function(self)
@@ -111,10 +111,6 @@ Instruct.build = function(self)
       self:build_send(id,bin)
     elseif string.sub(bin,7,8) == '01' then
       self:build_set(id,bin)
-    elseif string.sub(bin,2,2) == '1' then
-      self.dict[id] = { name = 'DO BANG' }
-    elseif string.sub(bin,1,1) == '1' then
-      self.dict[id] = { name = 'DO PLAY' }
     end
   end
   self:print()

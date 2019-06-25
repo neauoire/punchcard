@@ -74,7 +74,7 @@ function pos_at(id)
 end
 
 function to_hex(int)
-  return string.format('%02x',int)
+  return string.format('%01x',int):upper()
 end
 
 function line_to_bin(line)

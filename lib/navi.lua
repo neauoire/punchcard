@@ -92,20 +92,20 @@ Navi.view_card = function(self)
     line = self.stack:get_line(self.card,l)
     bin = line_to_bin(line)
     num = bin_to_num(bin)
-    if num > 0 then
+    name = self.instruct:get_name(num)
+    if num > 0 and name ~= '' then
       x = 0 ; y = count*7
       if count > 8 then x = 64 ; y = (count-8)*7 end
       if l == self.focus then screen.move(x,y) ; screen.text('>') end
-      name = self.instruct:get_name(num)
+      
+      y = y + 2
       -- line number
       screen.level(5)
-      screen.move(x+10,y)
-      screen.text(l)
+      screen.move(x+6,y)
+      screen.text(to_hex(l-1))
       screen.fill()
       screen.level(15)
-      screen.move(x+20,y)
-      screen.text(num)
-      screen.move(x+40,y)
+      screen.move(x+12,y)
       screen.text(name)
       screen.fill()
       count = count + 1
