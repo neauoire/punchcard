@@ -1,11 +1,16 @@
 local Operator = {}
 
 Operator.init = function(self)
+  
+end
+
+Operator.bind = function(self,navi)
+  self.navi = navi
 end
 
 Operator.run = function(self,id,program)
   print('===== '..id)
-  res = {}
+  res = { OCT = 4, STEP = tostring(((self.navi.frame-1)%16)+1) }
   -- Each line
   for token in string.gmatch(str, "[^;]+") do
     self:parse(token,res)
@@ -18,30 +23,35 @@ Operator.parse = function(self,line,res)
   for word in line:gmatch("%w+") do table.insert(words, word) end
   cmd = words[1]
   key = words[2]
-  val = words[4]
+  val = words[3]
   
   if Operator[cmd] ~= nil then
-    Operator[cmd](key,val,res)
+    Operator[cmd](self,key,val,res)
   else
     print('Unknown cmd:'..cmd)
   end
 end
 
-Operator.IF = function(key,val,res)
-  
+Operator.DO = function(self,key,val,res)
+  print(key,val)
 end
 
-Operator.SET = function(key,val,res)
-  
+Operator.IF = function(self,key,val,res)
+  if res[key] ~= val then res.skip = true end
 end
 
-Operator.SEND = function(key,val,res)
-  
+Operator.SET = function(self,key,val,res)
+  if res.skip == true then return end
+  res[key] = val
 end
 
+Operator.SEND = function(self,key,val,res)
+  if res.skip == true then return end
+  print('SEND',res.NOTE,res.OCT,key,val)
+end
 
 Operator.render = function(self,res)
-  tab.print(res)
+  -- tab.print(res)
 end
 
 function split_lines(str)

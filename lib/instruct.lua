@@ -14,23 +14,51 @@ Instruct.init = function(self)
   self:build()
 end
 
-Instruct.make_target = function(self,id)
-  return ''
+Instruct.bind = function(self,program)
+  self.program = program
 end
 
-Instruct.make_type = function(self,id,bin)
+-- IF
+
+Instruct.make_if_type = function(self,id,bin)
+  if char_at(bin,5,2) == '11' then return 'BANG'
+  elseif char_at(bin,5) == '1' then return 'STEP'
+  elseif char_at(bin,6) == '1' then return 'OCT'
+  else return 'NOTE' end
+end
+
+Instruct.build_if = function(self,id,bin)
+  _type = self:make_if_type(id,bin)
+  if _type == 'NOTE' then
+    _value = self:make_note(id,bin)
+  else
+    _value = self:make_number(id,bin)
+  end
+  self.dict[id] = { name = 'IF '.._type..' = '.._value }
+end
+
+-- SET
+
+Instruct.make_set_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'RATE'
   elseif char_at(bin,5) == '1' then return 'STEP'
   elseif char_at(bin,6) == '1' then return 'OCT'
   else return 'NOTE' end
 end
 
-Instruct.make_events = function(self,id,bin)
-  if char_at(bin,5,2) == '11' then return 'BANG'
-  elseif char_at(bin,5) == '1' then return 'STEP'
-  elseif char_at(bin,6) == '1' then return 'OCT'
-  else return 'NOTE' end
+Instruct.build_set = function(self,id,bin)
+  _type = self:make_set_type(id,bin)
+  if _type == 'NOTE' then
+    _value = self:make_note(id,bin)
+  elseif _type == 'OCT' then
+    _value = self:make_octave(id,bin)
+  else
+    _value = self:make_number(id,bin)
+  end
+  self.dict[id] = { name = 'SET '.._type..' = '.._value }
 end
+
+-- SEND
 
 Instruct.make_send_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'SYS'
@@ -38,6 +66,33 @@ Instruct.make_send_type = function(self,id,bin)
   elseif char_at(bin,6) == '1' then return 'OSC'
   else return 'CHAN' end
 end
+
+Instruct.build_send = function(self,id,bin)
+  _type = self:make_send_type(id,bin)
+  _value = self:make_number(id,bin)
+  self.dict[id] = { name = 'SEND '.._type..' > '.._value }
+end
+
+-- DO
+
+Instruct.make_do_type = function(self,id,bin)
+  if char_at(bin,5,2) == '11' then return 'SYS'
+  elseif char_at(bin,5) == '1' then return 'BANG'
+  elseif char_at(bin,6) == '1' then return 'OSC'
+  else return 'CHAN' end
+end
+
+Instruct.build_do = function(self,id,bin)
+  _type = self:make_do_type(id,bin)
+  if _type == 'NOTE' then
+    _value = self:make_note(id,bin)
+  else
+    _value = self:make_number(id,bin)
+  end
+  self.dict[id] = { name = 'DO '.._type..' : '.._value }
+end
+
+-- Generics
 
 Instruct.make_note = function(self,id,bin)
   key = self:make_number(id,bin)
@@ -80,34 +135,6 @@ Instruct.make_number = function(self,id,bin)
   return '0'
 end
 
-Instruct.build_if = function(self,id,bin)
-  _type = self:make_events(id,bin)
-  if _type == 'NOTE' then
-    _value = self:make_note(id,bin)
-  else
-    _value = self:make_number(id,bin)
-  end
-  self.dict[id] = { name = 'IF '.._type..' = '.._value }
-end
-
-Instruct.build_set = function(self,id,bin)
-  _type = self:make_type(id,bin)
-  if _type == 'NOTE' then
-    _value = self:make_note(id,bin)
-  elseif _type == 'OCT' then
-    _value = self:make_octave(id,bin)
-  else
-    _value = self:make_number(id,bin)
-  end
-  self.dict[id] = { name = 'SET '.._type..' = '.._value }
-end
-
-Instruct.build_send = function(self,id,bin)
-  _type = self:make_send_type(id,bin)
-  _value = self:make_number(id,bin)
-  self.dict[id] = { name = 'SEND '.._type..' > '.._value }
-end
-
 Instruct.build = function(self)
   print('Instruct','Build')
   for id=1,255 do
@@ -118,14 +145,14 @@ Instruct.build = function(self)
       self:build_send(id,bin)
     elseif string.sub(bin,7,8) == '01' then
       self:build_set(id,bin)
+    else
+      self:build_do(id,bin)
     end
   end
   self:print()
 end
 
-Instruct.bind = function(self,program)
-  self.program = program
-end
+-- Utils
 
 Instruct.get_name = function(self,num)
   if self.dict[num] then
@@ -147,7 +174,7 @@ Instruct.print = function(self)
     -- print(bin..' '..k)
     count = count + 1
   end
-  print(count..' instructs, '..math.floor((count/255)*100)..'%')
+  print(count..' instructs, '..math.floor((count/255)*100)..'% coverage')
 end
 
 return Instruct
