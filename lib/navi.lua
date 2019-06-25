@@ -116,10 +116,25 @@ Navi.view_card = function(self)
 end
 
 Navi.view_home = function(self)
-  screen.move(10,10)
-  screen.text('home'..self.frame)
+  offset = { x = 30, y = 13, spacing = 4 }
+  for x=1,16,1 do 
+    for y=1,8,1 do 
+      is_light = self.stack:known(id_at(x,y))
+      if is_light then
+        screen.level(15)
+      else
+        screen.level(1)
+      end
+      screen.pixel(offset.x+(x*offset.spacing),offset.y+(y*offset.spacing))
+      screen.fill()
+    end
+  end
+  
+  -- screen.move(10,10)
+  -- screen.text('home'..self.frame)
   screen.fill()
 end
+
 
 -- 
 

@@ -34,22 +34,22 @@ end
 
 Instruct.make_note = function(self,id,bin)
   key = self:make_number(id,bin)
-  if key == 16 then return 'NEXT+' end
-  if key == 15 then return 'PREV+' end
+  if key == 16 then return 'NEXT^' end
+  if key == 15 then return 'PREV^' end
   if key == 14 then return 'NEXT#' end
   if key == 13 then return 'PREV#' end
-  if key == 12 then return 'NEXT^' end
-  if key == 11 then return 'PREV^' end
-  if key == 10 then return 'INCR' end
-  if key ==  9 then return 'DECR' end
+  if key == 12 then return 'NEXT' end
+  if key == 11 then return 'PREV' end
+  if key == 10 then return 'INC' end
+  if key ==  9 then return 'DEC' end
   names = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
   return names[((key-1) % 12)+1]
 end
 
 Instruct.make_octave = function(self,id,bin)
   key = self:make_number(id,bin)
-  if key == 10 then return 'INCR' end
-  if key ==  9 then return 'DECR' end
+  if key == 10 then return 'INC' end
+  if key ==  9 then return 'DEC' end
   return math.floor(((key-1) % 8)+1)
 end
 
@@ -124,7 +124,7 @@ Instruct.get_name = function(self,num)
   if self.dict[num] then
     return self.dict[num].name
   end
-  return ''
+  return '--'
 end
 
 Instruct.print = function(self)
