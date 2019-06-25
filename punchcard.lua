@@ -4,8 +4,6 @@ local stack = include('lib/stack')
 local instruct = include('lib/instruct')
 
 local g
-local viewport = { width = 128, height = 64, frame = 0 }
-local focus = { x = 1, y = 1, brightness = 15 }
 
 -- Main
 
@@ -13,50 +11,23 @@ function init()
   stack:init()
   navi:init()
   instruct:init()
-  
   navi:bind(stack,instruct)
-  
   -- Render Style
   screen.level(15)
   screen.aa(0)
   screen.line_width(1)
-  
+  -- Ready
   navi:start()
-  test = 'hello'
 end
 
 -- Interactions
 
 function key(id,state)
-  if id == 2 and state == 1 then
-    focus.brightness = 15
-  elseif id == 3 and state == 1 then
-    focus.brightness = 5
-  end
   update()
 end
 
 function enc(id,delta)
-  if id == 2 then
-    focus.x = clamp(focus.x + delta, 1, 16)
-  elseif id == 3 then
-    focus.y = clamp(focus.y + delta, 1, 8)
-  end
   update()
-end
-
--- Render
-
-function draw_pixel(x,y)
-  if focus.x == x and focus.y == y then
-    screen.stroke()
-    screen.level(15)
-  end
-  screen.pixel((x*offset.spacing) + offset.x, (y*offset.spacing) + offset.y)
-  if focus.x == x and focus.y == y then
-    screen.stroke()
-    screen.level(1)
-  end
 end
 
 -- Utils
@@ -109,4 +80,3 @@ function char_at(str,index,length)
   length = length or 1
   return string.sub(bin,index,index+length-1)
 end
-

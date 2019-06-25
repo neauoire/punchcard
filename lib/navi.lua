@@ -2,7 +2,8 @@
 local Navi = {}
 local g
 
-Navi.focus = 0
+Navi.focus = 1
+Navi.frame = 1
 
 Navi.init = function(self)
   print('Control','Init')
@@ -10,6 +11,8 @@ Navi.init = function(self)
 end
 
 Navi.start = function(self)
+  self:set_bpm(120)
+  Navi.metro:start()
   self:redraw()
 end
 
@@ -95,10 +98,9 @@ Navi.view_card = function(self)
     name = self.instruct:get_name(num)
     if num > 0 and name ~= '' then
       x = 0 ; y = count*7
+      y = y + 2
       if count > 8 then x = 64 ; y = (count-8)*7 end
       if l == self.focus then screen.move(x,y) ; screen.text('>') end
-      
-      y = y + 2
       -- line number
       screen.level(5)
       screen.move(x+6,y)
@@ -115,7 +117,7 @@ end
 
 Navi.view_home = function(self)
   screen.move(10,10)
-  screen.text('home')
+  screen.text('home'..self.frame)
   screen.fill()
 end
 
@@ -131,6 +133,11 @@ Navi.toggle = function(self,id)
     self.stack:write(self.card,id,true)
   end
   self:redraw()
+end
+
+Navi.run = function(self)
+  self:redraw()
+  self.frame = self.frame + 1
 end
 
 -- 
@@ -163,6 +170,19 @@ Navi.redraw = function(self)
   end
   g:refresh()
   screen.update()
+end
+
+-- Metro
+
+Navi.set_bpm = function(self,bpm)
+  self.bpm = bpm
+  self.metro.time = 60 / (self.bpm*2)
+end
+
+Navi.metro = metro.init()
+Navi.metro.time = 1.0 / 15
+Navi.metro.event = function()
+  Navi:run()
 end
 
 return Navi
