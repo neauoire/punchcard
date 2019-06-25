@@ -2,6 +2,8 @@
 local Navi = {}
 local g
 
+Navi.focus = 0
+
 Navi.init = function(self)
   print('Control','Init')
   self:connect()
@@ -11,8 +13,9 @@ Navi.start = function(self)
   self:redraw()
 end
 
-Navi.bind = function(self,stack)
+Navi.bind = function(self,stack,instruct)
   self.stack = stack
+  self.instruct = instruct
 end
 
 Navi.connect = function(self)
@@ -56,7 +59,7 @@ end
 Navi.grid_card = function(self)
   -- Active Card
   pos = pos_at(self.card)
-  g:led(pos.x,pos.y,15)
+  g:led(pos.x,pos.y,5)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
@@ -83,8 +86,6 @@ end
 -- 
 
 Navi.view_card = function(self)
-  screen.move(100,10)
-  screen.text(Navi.card)
   screen.fill()
   count = 1
   for l=1,16 do
@@ -92,8 +93,21 @@ Navi.view_card = function(self)
     bin = line_to_bin(line)
     num = bin_to_num(bin)
     if num > 0 then
-      screen.move(0,count*6)
-      screen.text('> '..l..' '..num)
+      x = 0 ; y = count*7
+      if count > 8 then x = 64 ; y = (count-8)*7 end
+      if l == self.focus then screen.move(x,y) ; screen.text('>') end
+      name = self.instruct:get_name(num)
+      -- line number
+      screen.level(5)
+      screen.move(x+10,y)
+      screen.text(l)
+      screen.fill()
+      screen.level(15)
+      screen.move(x+20,y)
+      screen.text(num)
+      screen.move(x+40,y)
+      screen.text(name)
+      screen.fill()
       count = count + 1
     end
   end
@@ -110,6 +124,7 @@ end
 Navi.toggle = function(self,id)
   if self:in_card() ~= true then print('Not in a card') ; return end
   is_light = self.stack:read(self.card,id)
+  self.focus = pos_at(id).x
   if is_light == true then
     self.stack:write(self.card,id,false)
   else

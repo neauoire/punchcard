@@ -17,7 +17,6 @@ Stack.build = function(self)
       for b=1,128 do
         self.cards[id][b] = false
       end
-      print('Creating card '..x..','..y..' -> '..id)
     end
   end
 end
@@ -40,7 +39,6 @@ Stack.get_line = function(self,id,line_id)
   for y=1,8 do
     table.insert(res,self:read(id,id_at(line_id,y)))
   end
-  -- tab.print(res)
   return res
 end
 

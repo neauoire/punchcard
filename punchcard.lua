@@ -1,6 +1,7 @@
 
 local navi = include('lib/navi')
 local stack = include('lib/stack')
+local instruct = include('lib/instruct')
 
 local g
 local viewport = { width = 128, height = 64, frame = 0 }
@@ -11,8 +12,9 @@ local focus = { x = 1, y = 1, brightness = 15 }
 function init()
   stack:init()
   navi:init()
+  instruct:init()
   
-  navi:bind(stack)
+  navi:bind(stack,instruct)
   
   -- Render Style
   screen.level(15)
