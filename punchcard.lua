@@ -2,6 +2,7 @@
 local navi = include('lib/navi')
 local stack = include('lib/stack')
 local instruct = include('lib/instruct')
+local operator = include('lib/operator')
 
 local g
 
@@ -11,7 +12,7 @@ function init()
   stack:init()
   navi:init()
   instruct:init()
-  navi:bind(stack,instruct)
+  navi:bind(stack,instruct,operator)
   stack:bind(instruct)
   -- Render Style
   screen.level(15)
@@ -24,11 +25,13 @@ end
 -- Interactions
 
 function key(id,state)
-  update()
+  if id == 3 and state == 1 then
+    navi:toggle_play()
+  end
 end
 
 function enc(id,delta)
-  update()
+  
 end
 
 -- Utils

@@ -4,6 +4,7 @@ local g
 
 Navi.focus = 1
 Navi.frame = 1
+Navi.is_playing = true
 
 Navi.init = function(self)
   print('Control','Init')
@@ -16,9 +17,10 @@ Navi.start = function(self)
   self:redraw()
 end
 
-Navi.bind = function(self,stack,instruct)
+Navi.bind = function(self,stack,instruct,operator)
   self.stack = stack
   self.instruct = instruct
+  self.operator = operator
 end
 
 Navi.connect = function(self)
@@ -55,6 +57,28 @@ end
 
 Navi.on_grid_remove = function(self,g)
   print('on_remove')
+end
+
+Navi.toggle_play = function(self)
+  if self.is_playing == true then
+    self:stop()
+  else
+    self:play()
+  end
+end
+
+Navi.play = function(self)
+  print('play')
+  self.is_playing = true
+  Navi.metro:start()
+  self:redraw()
+end
+
+Navi.stop = function(self)
+  print('stop')
+  self.is_playing = false
+  Navi.metro:stop()
+  self:redraw()
 end
 
 -- 
@@ -149,7 +173,8 @@ end
 Navi.run = function(self)
   for id=1,128 do
     if self.stack:known(id) == true then
-      print(self.stack:get_program(id))
+      operation = self.stack:get_program(id)
+      self.operator:run(id,operation)
     end
   end
   self:redraw()

@@ -25,6 +25,13 @@ Instruct.make_type = function(self,id,bin)
   else return 'NOTE' end
 end
 
+Instruct.make_events = function(self,id,bin)
+  if char_at(bin,5,2) == '11' then return 'BANG'
+  elseif char_at(bin,5) == '1' then return 'STEP'
+  elseif char_at(bin,6) == '1' then return 'OCT'
+  else return 'NOTE' end
+end
+
 Instruct.make_send_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'SYS'
   elseif char_at(bin,5) == '1' then return 'BANG'
@@ -74,7 +81,7 @@ Instruct.make_number = function(self,id,bin)
 end
 
 Instruct.build_if = function(self,id,bin)
-  _type = self:make_type(id,bin)
+  _type = self:make_events(id,bin)
   if _type == 'NOTE' then
     _value = self:make_note(id,bin)
   else
@@ -127,20 +134,19 @@ Instruct.get_name = function(self,num)
   return '--'
 end
 
+Instruct.operate = function(self,op)
+  
+end
+
 Instruct.print = function(self)
   collection = {}
-  
-  for id=1,255 do
-    collection[self:get_name(id)] = id
-  end
-  
+  for id=1,255 do collection[self:get_name(id)] = id end
   count = 0
   for k, v in pairs(collection) do
     bin = num_to_bin(v)
     -- print(bin..' '..k)
     count = count + 1
   end
-
   print(count..' instructs, '..math.floor((count/255)*100)..'%')
 end
 
