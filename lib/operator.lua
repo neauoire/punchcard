@@ -1,4 +1,4 @@
-local Operator = {}
+local Operator = { senders = {} }
 
 Operator.init = function(self)
   
@@ -11,7 +11,7 @@ end
 Operator.run = function(self,id,program)
   print('===== '..id)
   -- Defaults
-  res = { OCT = 5, STEP = tostring(((self.navi.frame-1)%16)+1), VEL = 16 }
+  res = { id = id, OCT = 5, STEP = tostring(((self.navi.frame-1)%16)+1), VEL = 16 }
   -- Each line
   for token in string.gmatch(str, "[^;]+") do
     self:parse(token,res)
@@ -34,6 +34,7 @@ Operator.parse = function(self,line,res)
 end
 
 Operator.IF = function(self,key,val,res)
+  res.skip = false
   if key == 'STEP' then
     if tonumber(val) ~= limit(self.navi.frame,val) then res.skip = true end
   elseif key == 'NOTE' then
@@ -41,7 +42,6 @@ Operator.IF = function(self,key,val,res)
   else 
     if tonumber(res[key]) ~= tonumber(val) then res.skip = true end
   end
-  print(res.OCT,key,val)
 end
 
 Operator.SET = function(self,key,val,res)
@@ -58,6 +58,7 @@ Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
   if res.NOTE == nil then return end
   print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
+  self.senders[res.id] = true
 end
 
 Operator.DO = function(self,key,val,res)

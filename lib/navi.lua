@@ -12,7 +12,7 @@ Navi.init = function(self)
 end
 
 Navi.start = function(self)
-  self:set_bpm(20)
+  self:set_bpm(120)
   Navi.metro:start()
   self:redraw()
 end
@@ -86,7 +86,11 @@ end
 Navi.grid_card = function(self)
   -- Active Card
   pos = pos_at(self.card)
-  g:led(pos.x,pos.y,5)
+  if self.operator.senders[self.card] then
+    g:led(pos.x,pos.y,10)
+  else
+    g:led(pos.x,pos.y,5)
+  end
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
@@ -102,9 +106,14 @@ Navi.grid_home = function(self)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
-      is_light = self.stack:known(id_at(x,y))
+      id = id_at(x,y)
+      is_light = self.stack:known(id)
       if is_light then
-        g:led(x,y,5)
+        if self.operator.senders[id] then
+          g:led(x,y,10)
+        else
+          g:led(x,y,5)
+        end
       end
     end
   end 
@@ -142,9 +151,14 @@ Navi.view_home = function(self)
   offset = { x = 30, y = 13, spacing = 4 }
   for x=1,16,1 do 
     for y=1,8,1 do 
-      is_light = self.stack:known(id_at(x,y))
+      id = id_at(x,y)
+      is_light = self.stack:known(id)
       if is_light then
-        screen.level(15)
+        if self.operator.senders[id] then
+          screen.level(15)
+        else
+          screen.level(10)
+        end
       else
         screen.level(1)
       end
@@ -170,6 +184,7 @@ end
 
 Navi.run = function(self)
   for id=1,128 do
+    self.operator.senders[id] = false
     if self.stack:known(id) == true then
       operation = self.stack:get_program(id)
       self.operator:run(id,operation)
