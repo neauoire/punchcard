@@ -76,10 +76,10 @@ end
 -- DO
 
 Instruct.make_do_type = function(self,id,bin)
-  if char_at(bin,5,2) == '11' then return 'SYS'
-  elseif char_at(bin,5) == '1' then return 'BANG'
-  elseif char_at(bin,6) == '1' then return 'OSC'
-  else return 'CHAN' end
+  if char_at(bin,5,2) == '11' then return 'CLAMP'
+  elseif char_at(bin,5) == '1' then return 'INCR'
+  elseif char_at(bin,6) == '1' then return 'DECR'
+  else return 'MOD' end
 end
 
 Instruct.build_do = function(self,id,bin)
