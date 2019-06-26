@@ -155,7 +155,6 @@ Navi.view_home = function(self)
   end
 end
 
-
 -- 
 
 Navi.toggle = function(self,id)

@@ -41,6 +41,10 @@ function clamp(val,min,max)
   return val < min and min or val > max and max or val
 end
 
+function limit(val,length)
+  return ((val-1) % length)+1
+end
+
 function id_at(x,y)
   return ((y-1)*16)+x
 end
@@ -51,6 +55,17 @@ end
 
 function to_hex(int)
   return string.format('%01x',int):upper()
+end
+
+function note_to_num(note)
+  return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
+end
+
+function index_of(list,value)
+  for i=1,#list do
+    if list[i] == value then return i end
+  end
+  return -1
 end
 
 function line_to_bin(line)

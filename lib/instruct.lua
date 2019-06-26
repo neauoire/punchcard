@@ -41,7 +41,7 @@ end
 
 Instruct.make_set_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'RATE'
-  elseif char_at(bin,5) == '1' then return 'STEP'
+  elseif char_at(bin,5) == '1' then return 'VEL'
   elseif char_at(bin,6) == '1' then return 'OCT'
   else return 'NOTE' end
 end
@@ -73,13 +73,13 @@ Instruct.build_send = function(self,id,bin)
   self.dict[id] = { name = 'SEND '.._type..' > '.._value }
 end
 
--- DO
+-- WHEN
 
 Instruct.make_do_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'CLAMP'
   elseif char_at(bin,5) == '1' then return 'INCR'
   elseif char_at(bin,6) == '1' then return 'DECR'
-  else return 'MOD' end
+  else return 'LIMIT' end
 end
 
 Instruct.build_do = function(self,id,bin)
@@ -104,7 +104,7 @@ Instruct.make_note = function(self,id,bin)
   if key == 11 then return 'PREV' end
   if key == 10 then return 'INC' end
   if key ==  9 then return 'DEC' end
-  names = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
+  names = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
   return names[((key-1) % 12)+1]
 end
 

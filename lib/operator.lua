@@ -10,7 +10,7 @@ end
 
 Operator.run = function(self,id,program)
   print('===== '..id)
-  res = { OCT = 4, STEP = tostring(((self.navi.frame-1)%16)+1) }
+  res = { OCT = 5, STEP = tostring(((self.navi.frame-1)%16)+1), VEL = 16 }
   -- Each line
   for token in string.gmatch(str, "[^;]+") do
     self:parse(token,res)
@@ -32,22 +32,49 @@ Operator.parse = function(self,line,res)
   end
 end
 
-Operator.DO = function(self,key,val,res)
-  print(key,val)
-end
-
 Operator.IF = function(self,key,val,res)
-  if res[key] ~= val then res.skip = true end
+  if key == 'STEP' then
+    if tonumber(val) ~= limit(self.navi.frame,val) then res.skip = true end
+  elseif key == 'NOTE' then
+    if tonumber(res[key]) ~= note_to_num(val) then res.skip = true end
+  else 
+    if tonumber(res[key]) ~= tonumber(val) then res.skip = true end
+  end
+  print(res.OCT,key,val)
 end
 
 Operator.SET = function(self,key,val,res)
   if res.skip == true then return end
-  res[key] = val
+  if key == 'NOTE' then
+    res.NOTE = math.floor(note_to_num(val))
+  else
+    res[key] = val
+  end
+  res.LAST = key
 end
 
 Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
-  print('SEND',res.NOTE,res.OCT,key,val)
+  if res.NOTE == nil then return end
+  print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
+end
+
+Operator.DO = function(self,key,val,res)
+  if res.skip == true then return end
+  if res.LAST == nil then return end
+  if res[res.LAST] == nil then return end
+  if key == 'INCR' then
+    res[res.LAST] = tonumber(res[res.LAST]) + tonumber(val)
+  end
+  if key == 'DECR' then
+    res[res.LAST] = tonumber(res[res.LAST]) - tonumber(val)
+  end
+  if key == 'CLAMP' then
+    res[res.LAST] = clamp(tonumber(res[res.LAST]),1,tonumber(val))
+  end
+  if key == 'LIMIT' then
+    res[res.LAST] = limit(tonumber(res[res.LAST]),tonumber(val))
+  end
 end
 
 Operator.render = function(self,res)
