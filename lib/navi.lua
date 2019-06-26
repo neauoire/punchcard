@@ -117,11 +117,10 @@ Navi.view_card = function(self)
   count = 1
   for l=1,16 do
     name = self.stack:get_line(self.card,l)
-    if num > 0 and name ~= '' then
-      x = 0 ; y = count*7
-      if count > 8 then x = 64 ; y = (count-8)*7 end
-      y = y + 2
-      -- line number
+    x = 0 ; y = count*7
+    if count > 8 then x = 64 ; y = (count-8)*7 end
+    y = y + 2
+    if l < 9 or name ~= '' then
       screen.level(5)
       screen.move(x,y)
       if l == self.focus then
@@ -130,12 +129,12 @@ Navi.view_card = function(self)
         screen.text(to_hex(l-1))
       end
       screen.fill()
-      screen.level(15)
-      screen.move(x+6,y)
-      screen.text(name)
-      screen.fill()
-      count = count + 1
     end
+    screen.level(15)
+    screen.move(x+6,y)
+    screen.text(name)
+    screen.fill()
+    count = count + 1
   end
 end
 

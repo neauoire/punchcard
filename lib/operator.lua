@@ -10,6 +10,7 @@ end
 
 Operator.run = function(self,id,program)
   print('===== '..id)
+  -- Defaults
   res = { OCT = 5, STEP = tostring(((self.navi.frame-1)%16)+1), VEL = 16 }
   -- Each line
   for token in string.gmatch(str, "[^;]+") do
@@ -28,7 +29,7 @@ Operator.parse = function(self,line,res)
   if Operator[cmd] ~= nil then
     Operator[cmd](self,key,val,res)
   else
-    print('Unknown cmd:'..cmd)
+    print('Unknown CMD:'..cmd)
   end
 end
 

@@ -1,7 +1,5 @@
 
-local Stack = {}
-
-Stack.cards = {}
+local Stack = { cards = {} }
 
 Stack.init = function(self)
   print('Control','Init')
@@ -34,7 +32,11 @@ Stack.write = function(self,i,b,v)
 end
 
 Stack.known = function(self,id)
-  for b=1,128 do if self.cards[id][b] ~= false then return true end end
+  for b=1,128 do 
+    if self:get_card(id)[b] ~= false then 
+      return true 
+    end 
+  end
   return false
 end
 

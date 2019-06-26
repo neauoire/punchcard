@@ -1,10 +1,16 @@
+--  
+--   ////\\\\
+--   ////\\\\  PUNCHCARD
+--   ////\\\\  BY NEAUOIRE
+--   \\\\////
+--   \\\\////  255 SEQUENCER
+--   \\\\////
+--
 
 local navi = include('lib/navi')
 local stack = include('lib/stack')
 local instruct = include('lib/instruct')
 local operator = include('lib/operator')
-
-local g
 
 -- Main
 
@@ -12,6 +18,7 @@ function init()
   stack:init()
   navi:init()
   instruct:init()
+  -- Setup
   navi:bind(stack,instruct,operator)
   stack:bind(instruct)
   operator:bind(navi)
@@ -21,18 +28,6 @@ function init()
   screen.line_width(1)
   -- Ready
   navi:start()
-end
-
--- Interactions
-
-function key(id,state)
-  if id == 3 and state == 1 then
-    navi:toggle_play()
-  end
-end
-
-function enc(id,delta)
-  
 end
 
 -- Utils
