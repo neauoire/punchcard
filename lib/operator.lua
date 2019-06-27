@@ -144,8 +144,4 @@ Operator.DO = function(self,key,val,res)
   end
 end
 
-Operator.render = function(self,res)
-  -- tab.print(res)
-end
-
 return Operator
