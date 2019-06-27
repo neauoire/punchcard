@@ -59,7 +59,7 @@ end
 
 Operator.run_card = function(self,id,instructions)
   -- Defaults
-  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step(), BANG = self.navi:get_bangs(id) }
+  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step(), FRAME = self.navi:get_step(), BANG = self.navi:get_bangs(id) }
   for id=1,#instructions do
     local i = instructions[id]
     if i > 0 then

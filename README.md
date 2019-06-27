@@ -1,8 +1,6 @@
-# Punchcard
+# Machine
 
-A monome & norns sequencer/computer with 255 instructions. 
-
-<img src='https://github.com/neauoire/punchcard/blob/master/PREVIEW.jpg?raw=true' width='600'/>
+A norns sequencer/computer with 255 instructions.
 
 ## Commands
 
@@ -263,3 +261,12 @@ A monome & norns sequencer/computer with 255 instructions.
 11111110  SENDBANG16
 11111111  IFBANG16
 ```
+
+## TODOs
+
+- OSC
+- BPM
+- BREAK
+- INCR/DECR
+- MAJUP/MAJDOWN
+

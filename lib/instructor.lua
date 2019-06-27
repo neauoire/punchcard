@@ -38,7 +38,7 @@ end
 Instructor.make_if_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'BANG'
   elseif char_at(bin,5) == '1' then return 'STEP'
-  elseif char_at(bin,6) == '1' then return 'OCT'
+  elseif char_at(bin,6) == '1' then return 'FRAME'
   else return 'NOTE' end
 end
 
