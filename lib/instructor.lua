@@ -33,10 +33,6 @@ Instructor.init = function(self)
   self:build()
 end
 
-Instructor.bind = function(self,program)
-  self.program = program
-end
-
 -- IF
 
 Instructor.make_if_type = function(self,id,bin)
@@ -54,7 +50,7 @@ Instructor.build_if = function(self,id,bin)
   end
 
   if _type and _value then
-    self.dict[id] = { cmd = 'IF', key = _type, val = _value, name = 'IF '.._type..'='.._value }
+    self.dict[id] = { cmd = 'IF', key = _type, val = _value }
   else
     print('Incomplete IF instruction: '..bin, _type,_value)
   end
@@ -79,7 +75,7 @@ Instructor.build_set = function(self,id,bin)
   end
   
   if _type and _value then
-    self.dict[id] = { cmd = 'SET', key = _type, val = _value, name = 'SET '.._type..'='.._value }
+    self.dict[id] = { cmd = 'SET', key = _type, val = _value }
   else
     print('Incomplete SET instruction: '..bin)
   end
@@ -88,8 +84,8 @@ end
 -- SEND
 
 Instructor.make_send_type = function(self,id,bin)
-  if char_at(bin,5,2) == '11' then return 'SYS'
-  elseif char_at(bin,5) == '1' then return 'BANG'
+  if char_at(bin,5,2) == '11' then return 'BANG'
+  elseif char_at(bin,5) == '1' then return 'SYS'
   elseif char_at(bin,6) == '1' then return 'OSC'
   else return 'CHAN' end
 end
@@ -99,7 +95,7 @@ Instructor.build_send = function(self,id,bin)
   local _value = self:make_number(id,bin)
   
   if _type and _value then
-    self.dict[id] = { cmd = 'SEND', key = _type, val = _value, name = 'SEND '.._type..'>'.._value }
+    self.dict[id] = { cmd = 'SEND', key = _type, val = _value }
   else
     print('Incomplete SEND instruction: '..bin)
   end
@@ -122,7 +118,7 @@ Instructor.build_do = function(self,id,bin)
   end
 
   if _type and _value then
-    self.dict[id] = { cmd = 'DO', key = _type, val = _value, name = 'DO '.._type..':'.._value }
+    self.dict[id] = { cmd = 'DO', key = _type, val = _value }
   else
     print('Incomplete DO instruction: '..bin)
   end
@@ -186,13 +182,6 @@ Instructor.name = function(self,instruction)
   if instruction.key == nil then return 'ERROR:KEY' end
   if instruction.val == nil then return 'ERROR:VAL' end
   return instruction.cmd..instruction.key..instruction.val
-end
-
-Instructor.get_name = function(self,num)
-  if self.dict[num] then
-    return self.dict[num].name
-  end
-  return '--'
 end
 
 return Instructor

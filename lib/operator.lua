@@ -1,6 +1,10 @@
-local Operator = { senders = {} }
+local Operator = { senders = {}, bangs = {} }
 
 -- Utils
+
+local pos_at = function(id)
+  return { x = math.floor(id % 16), y = math.floor(id/16)+1  }
+end
 
 local limit = function(val,length)
   return ((val-1) % length)+1
@@ -34,8 +38,10 @@ Operator.bind = function(self,navi,stack,instructor)
 end
 
 Operator.reset = function(self)
+  self.bangs = {}
+  self.senders = {}
   for id=1,128 do
-    self.senders[id] = false
+     -- = false
   end
 end
 
@@ -50,8 +56,7 @@ end
 Operator.run_card = function(self,id,instructions)
   print('===== '..id)
   -- Defaults
-  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step() }
-
+  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step(), BANG = self.navi:get_bangs(id) }
   for id=1,#instructions do
     local i = instructions[id]
     if i > 0 then
@@ -75,26 +80,14 @@ Operator.run = function(self)
   self:run_cards(cards)
 end
 
-Operator.parse = function(self,line,res)
-  local words = {}
-  for word in line:gmatch("%w+") do table.insert(words, word) end
-  cmd = words[1]
-  key = words[2]
-  val = words[3]
-  
-  if Operator[cmd] ~= nil then
-    Operator[cmd](self,key,val,res)
-  else
-    print('Unknown CMD:'..cmd)
-  end
-end
-
 Operator.IF = function(self,key,val,res)
   res.skip = false
   if key == 'STEP' then
     if tonumber(val) ~= limit(res.STEP,tonumber(val)) then res.skip = true end
   elseif key == 'NOTE' then
     if tonumber(res[key]) ~= note_to_num(val) then res.skip = true end
+  elseif key == 'BANG' then
+    if res.BANG[tonumber(val)] ~= true then res.skip = true end
   else 
     if tonumber(res[key]) ~= tonumber(val) then res.skip = true end
   end
@@ -112,9 +105,21 @@ end
 
 Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
-  if res.NOTE == nil then return end
-  print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
-  self.senders[res.id] = true
+  if key == 'CHAN' then
+    if res.NOTE == nil then return end
+    self.senders[res.id] = true
+    print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
+  elseif key == 'OSC' then
+    self.senders[res.id] = true
+    print('SEND: '..key..': '..val)
+  elseif key == 'BANG' then
+    self.senders[res.id] = true
+    self.bangs[res.id] = val
+    print('SEND: '..key..': '..val)
+  elseif key == 'SYS' then
+    self.senders[res.id] = true
+    print('SEND: '..key..': '..val)
+  end
 end
 
 Operator.DO = function(self,key,val,res)
@@ -137,14 +142,6 @@ end
 
 Operator.render = function(self,res)
   -- tab.print(res)
-end
-
-function split_lines(str)
-  res = {}
-  for token in string.gmatch(str, "[^;]+") do
-    table.insert(res,token)
-  end
-  return res
 end
 
 return Operator

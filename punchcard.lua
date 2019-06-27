@@ -18,7 +18,6 @@ function init()
   -- Setup
   navi:bind(stack,instructor,operator)
   stack:bind(instructor)
-  instructor:bind()
   operator:bind(navi,stack,instructor)
   -- Init
   stack:init()

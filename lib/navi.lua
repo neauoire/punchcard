@@ -23,7 +23,7 @@ Navi.init = function(self)
 end
 
 Navi.start = function(self)
-  self:set_bpm(120)
+  self:set_bpm(20)
   Navi.metro:start()
   self:redraw()
 end
@@ -171,7 +171,7 @@ Navi.view_home = function(self)
         if self.operator.senders[id] then
           screen.level(15)
         else
-          screen.level(10)
+          screen.level(5)
         end
       else
         screen.level(1)
@@ -215,6 +215,23 @@ Navi.leave_card = function(self)
   print('leave '..Navi.card)
   Navi.card = nil
   Navi:redraw()
+end
+
+Navi.get_bangs = function(self,id)
+  local ns = {}
+  local origin = pos_at(id)
+
+  local west = id_at(origin.x-1,origin.y)
+  local north_west = id_at(origin.x-1,origin.y-1)
+  local north = id_at(origin.x,origin.y-1)
+  local north_east = id_at(origin.x+1,origin.y-1)
+
+  if self.operator.bangs[west] then ns[self.operator.bangs[west]] = true end
+  if self.operator.bangs[north_west] then ns[self.operator.bangs[north_west]] = true end
+  if self.operator.bangs[north] then ns[self.operator.bangs[north]] = true end
+  if self.operator.bangs[north_east] then ns[self.operator.bangs[north_east]] = true end
+  
+  return ns
 end
 
 Navi.in_card = function(self)
