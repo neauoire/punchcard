@@ -2,7 +2,7 @@
 
 A norns sequencer/computer with 255 instructions.
 
-<img src='https://github.com/neauoire/punchcard/blob/master/PREVIEW.jog?raw=true' width='600'/>
+<img src='https://github.com/neauoire/punchcard/blob/master/PREVIEW.jpg?raw=true' width='600'/>
 
 ## Commands
 
