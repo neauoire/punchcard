@@ -97,6 +97,7 @@ Stack.get_card = function(self,id)
 end
 
 Stack.erase_card = function(self,id)
+  if id == nil then print('Cannot erase in home view'); return end
   id = id or self.navi.card
   print('erase',id)
   for i=1,128 do
