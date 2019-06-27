@@ -25,6 +25,10 @@ local note_to_num = function(note)
   return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
 end
 
+local midi_to_hz = function(note)
+  return (440/32) * (2 ^ ((note - 9) / 12))
+end
+
 -- Begin
 
 Operator.init = function(self)
@@ -54,7 +58,6 @@ Operator.run_instruction = function(self,instruction,res)
 end
 
 Operator.run_card = function(self,id,instructions)
-  print('===== '..id)
   -- Defaults
   res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step(), BANG = self.navi:get_bangs(id) }
   for id=1,#instructions do
@@ -108,6 +111,7 @@ Operator.SEND = function(self,key,val,res)
   if key == 'CHAN' then
     if res.NOTE == nil then return end
     self.senders[res.id] = true
+    engine.hz(midi_to_hz(res.NOTE+(res.OCT*12)))
     print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
   elseif key == 'OSC' then
     self.senders[res.id] = true
