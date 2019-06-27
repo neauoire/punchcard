@@ -4,8 +4,12 @@ A norns sequencer/computer with 255 instructions.
 
 ## Controls
 
-- K2, erase card.
-- K3, toggle play/stop.
+- `K2`, erase selected card.
+- `K3`, toggle play/stop.
+
+## Parameters
+
+- `BPM`, run speed.
 
 ## Commands
 
@@ -270,7 +274,6 @@ A norns sequencer/computer with 255 instructions.
 ## TODOs
 
 - OSC
-- BPM
 - INCR/DECR
 - MAJUP/MAJDOWN
 

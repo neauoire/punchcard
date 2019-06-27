@@ -19,6 +19,8 @@ function init()
   navi:bind(stack,instructor,operator)
   stack:bind(navi,instructor)
   operator:bind(navi,stack,instructor)
+  -- Params
+  params:add{type = "number", id = "bpm", name = "BPM", min = 40, max = 400, default = 120, action=function(val) navi:set_bpm(val) end}
   -- Init
   stack:init()
   navi:init()
@@ -62,4 +64,3 @@ function redraw()
   navi.grid:refresh()
   screen.update()
 end
-

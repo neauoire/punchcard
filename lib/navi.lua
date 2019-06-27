@@ -240,8 +240,9 @@ end
 -- Metro
 
 Navi.set_bpm = function(self,bpm)
-  self.bpm = bpm
-  self.metro.time = 60 / (self.bpm*2)
+  print('BPM',params:get("bpm"))
+  params:set("bpm",bpm)
+  self.metro.time = 60 / (params:get("bpm")*2)
 end
 
 Navi.metro = metro.init()
