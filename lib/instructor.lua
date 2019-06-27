@@ -113,6 +113,10 @@ Instructor.make_do_type = function(self,id,bin)
 end
 
 Instructor.build_do = function(self,id,bin)
+  -- Specials
+  if bin == '10000000' then self.dict[id] = { cmd = 'DO', key = 'BREAK', val = '' } ; return end
+  if bin == '01000000' then self.dict[id] = { cmd = 'DO', key = 'SKIP', val = '' } ; return end
+  -- Normals
   local _type = self:make_do_type(id,bin)
   local _value = self:make_number(id,bin)
   if _type == 'NOTE' then 

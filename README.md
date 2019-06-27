@@ -271,6 +271,10 @@ A norns sequencer/computer with 255 instructions.
 
 - OSC
 - BPM
-- BREAK
 - INCR/DECR
 - MAJUP/MAJDOWN
+
+### Specials
+
+- SKIP
+- BREAK

@@ -88,6 +88,7 @@ Operator.run = function(self)
 end
 
 Operator.IF = function(self,key,val,res)
+  if res.broke == true then return end
   res.skip = false
   if key == 'STEP' then
     if tonumber(val) ~= limit(res.STEP,tonumber(val)) then res.skip = true end
@@ -101,6 +102,7 @@ Operator.IF = function(self,key,val,res)
 end
 
 Operator.SET = function(self,key,val,res)
+  if res.broke == true then return end
   if res.skip == true then return end
   if key == 'NOTE' then
     res.NOTE = math.floor(note_to_num(val))
@@ -112,6 +114,7 @@ end
 
 Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
+  if res.broke == true then return end
   if key == 'CHAN' then
     if res.NOTE == nil then return end
     local value = res.NOTE+(res.OCT*12)
@@ -131,8 +134,11 @@ end
 
 Operator.DO = function(self,key,val,res)
   if res.skip == true then return end
+  if res.broke == true then return end
   if res.LAST == nil then return end
   if res[res.LAST] == nil then return end
+  if key == 'SKIP' then res.skip = true end
+  if key == 'BREAK' then res.broke = true end
   if key == 'INCR' then
     res[res.LAST] = tonumber(res[res.LAST]) + tonumber(val)
   end
