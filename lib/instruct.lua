@@ -1,6 +1,10 @@
 
+
 local Instruct = { dict = {} }
 local types = {}
+
+
+local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
 
 types.conditional = 1
 
@@ -9,8 +13,7 @@ Instruct.init = function(self)
   self:build()
 end
 
-Instruct.bind = function(self,utils,program)
-  self.utils = utils
+Instruct.bind = function(self,program)
   self.program = program
 end
 
@@ -24,13 +27,18 @@ Instruct.make_if_type = function(self,id,bin)
 end
 
 Instruct.build_if = function(self,id,bin)
-  _type = self:make_if_type(id,bin)
+  local _type = self:make_if_type(id,bin)
   if _type == 'NOTE' then
-    _value = self:make_note(id,bin)
+    local _value = self:make_note(id,bin)
   else
-    _value = self:make_number(id,bin)
+    local _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'IF '.._type..'='.._value }
+
+  if _type and _value then
+    self.dict[id] = { name = 'IF '.._type..'='.._value }
+  else
+    print('Incomplete IF instruction: '..bin)
+  end
 end
 
 -- SET
@@ -43,15 +51,20 @@ Instruct.make_set_type = function(self,id,bin)
 end
 
 Instruct.build_set = function(self,id,bin)
-  _type = self:make_set_type(id,bin)
+  local _type = self:make_set_type(id,bin)
   if _type == 'NOTE' then
-    _value = self:make_note(id,bin)
+    local _value = self:make_note(id,bin)
   elseif _type == 'OCT' then
-    _value = self:make_octave(id,bin)
+    local _value = self:make_octave(id,bin)
   else
-    _value = self:make_number(id,bin)
+    local _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'SET '.._type..'='.._value }
+  
+  if _type and _value then
+    self.dict[id] = { name = 'SET '.._type..'='.._value }
+  else
+    print('Incomplete SET instruction: '..bin)
+  end
 end
 
 -- SEND
@@ -64,9 +77,14 @@ Instruct.make_send_type = function(self,id,bin)
 end
 
 Instruct.build_send = function(self,id,bin)
-  _type = self:make_send_type(id,bin)
-  _value = self:make_number(id,bin)
-  self.dict[id] = { name = 'SEND '.._type..'>'.._value }
+  local _type = self:make_send_type(id,bin)
+  local _value = self:make_number(id,bin)
+  
+  if _type and _value then
+    self.dict[id] = { name = 'SEND '.._type..'>'.._value }
+  else
+    print('Incomplete SEND instruction: '..bin)
+  end
 end
 
 -- WHEN
@@ -79,19 +97,24 @@ Instruct.make_do_type = function(self,id,bin)
 end
 
 Instruct.build_do = function(self,id,bin)
-  _type = self:make_do_type(id,bin)
+  local _type = self:make_do_type(id,bin)
   if _type == 'NOTE' then
-    _value = self:make_note(id,bin)
+    local _value = self:make_note(id,bin)
   else
-    _value = self:make_number(id,bin)
+    local _value = self:make_number(id,bin)
   end
-  self.dict[id] = { name = 'DO '.._type..':'.._value }
+
+  if _type and _value then
+    self.dict[id] = { name = 'DO '.._type..':'.._value }
+  else
+    print('Incomplete DO instruction: '..bin)
+  end
 end
 
 -- Generics
 
 Instruct.make_note = function(self,id,bin)
-  key = self:make_number(id,bin)
+  local key = self:make_number(id,bin)
   if key == 16 then return 'NEXT^' end
   if key == 15 then return 'PREV^' end
   if key == 14 then return 'NEXT#' end
@@ -100,12 +123,11 @@ Instruct.make_note = function(self,id,bin)
   if key == 11 then return 'PREV' end
   if key == 10 then return 'INC' end
   if key ==  9 then return 'DEC' end
-  names = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
-  return names[((key-1) % 12)+1]
+  return OCTAVE[((key-1) % 12)+1]
 end
 
 Instruct.make_octave = function(self,id,bin)
-  key = self:make_number(id,bin)
+  local key = self:make_number(id,bin)
   if key == 10 then return 'INC' end
   if key ==  9 then return 'DEC' end
   return math.floor(((key-1) % 8)+1)
@@ -132,9 +154,9 @@ Instruct.make_number = function(self,id,bin)
 end
 
 Instruct.build = function(self)
-  print('Instruct','Build')
+  print('Instruct','Building..')
   for id=1,255 do
-    bin = num_to_bin(id)
+    local bin = num_to_bin(id)
     if string.sub(bin,7,8) == '11' then
       self:build_if(id,bin)
     elseif string.sub(bin,7,8) == '10' then
@@ -145,6 +167,7 @@ Instruct.build = function(self)
       self:build_do(id,bin)
     end
   end
+  print('Instruct','Completed.')
   self:print()
 end
 
@@ -162,11 +185,11 @@ Instruct.operate = function(self,op)
 end
 
 Instruct.print = function(self)
-  collection = {}
+  local collection = {}
   for id=1,255 do collection[self:get_name(id)] = id end
-  count = 0
+  local count = 0
   for k, v in pairs(collection) do
-    bin = num_to_bin(v)
+    -- local bin = num_to_bin(v)
     -- print(bin..' '..k)
     count = count + 1
   end
@@ -176,16 +199,16 @@ end
 -- Utils
 
 char_at = function(str,index,length)
-  length = length or 1
-  return string.sub(bin,index,index+length-1)
+  length = (length or 1)
+  return string.sub(str,index,index+length-1)
 end
 
 num_to_bin = function(num)
-  local t={}
+  local t = {}
   for b=8,1,-1 do
-    rest=math.fmod(num,2)
-    t[b]=math.floor(rest)
-    num=(num-rest)/2
+    rest = math.fmod(num,2)
+    t[b] = math.floor(rest)
+    num = (num-rest)/2
   end
   return table.concat(t)
 end

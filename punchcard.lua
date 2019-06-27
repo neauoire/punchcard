@@ -7,7 +7,6 @@
 --   \\\\////
 --
 
-local utils = include('lib/utils')
 local navi = include('lib/navi')
 local stack = include('lib/stack')
 local instruct = include('lib/instruct')
@@ -17,10 +16,10 @@ local operator = include('lib/operator')
 
 function init()
   -- Setup
-  navi:bind(utils,stack,instruct,operator)
-  stack:bind(utils,instruct)
-  instruct:bind(utils)
-  operator:bind(utils,navi)
+  navi:bind(stack,instruct,operator)
+  stack:bind(instruct)
+  instruct:bind()
+  operator:bind(navi)
   -- Init
   stack:init()
   navi:init()

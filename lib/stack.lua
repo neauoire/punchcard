@@ -1,4 +1,3 @@
-
 local Stack = { cards = {} }
 
 Stack.init = function(self)
@@ -6,8 +5,7 @@ Stack.init = function(self)
   self:build()
 end
 
-Stack.bind = function(self,utils,instruct)
-  self.utils = utils
+Stack.bind = function(self,instruct)
   self.instruct = instruct
 end
 
@@ -15,7 +13,7 @@ Stack.build = function(self)
   self.cards = {}
   for x=1,16 do
     for y=1,8 do
-      id = self.utils.id_at(x,y)
+      local id = id_at(x,y)
       self.cards[id] = {}
       for b=1,128 do
         self.cards[id][b] = false
@@ -44,17 +42,15 @@ end
 Stack.get_line = function(self,id,line_id)
   res = {}
   for y=1,8 do
-    table.insert(res,self:read(id,self.utils.id_at(line_id,y)))
+    table.insert(res,self:read(id,id_at(line_id,y)))
   end
-  bin = line_to_bin(res)
-  num = bin_to_num(bin)
-  return self.instruct:get_name(num)
+  return self.instruct:get_name(bin_to_num(line_to_bin(res)))
 end
 
 Stack.get_program = function(self,id)
-  str = ''
+  local str = ''
   for y=1,16 do
-    name = self:get_line(id,y)
+    local name = self:get_line(id,y)
     if name ~= '' and name ~= '--' then
       str = str..name..';'
     end
@@ -66,10 +62,10 @@ Stack.get_card = function(self,id)
   return self.cards[id]
 end
 
--- utils
+-- Utils
 
 line_to_bin = function(line)
-  bin = ''
+  local bin = ''
   for i=1,#line do
     if line[i] == true then bin = bin..'1' else bin = bin..'0' end
   end
@@ -77,13 +73,17 @@ line_to_bin = function(line)
 end
 
 bin_to_num = function(bin)
-  bin = string.reverse(bin)
+  local bin = string.reverse(bin)
   local sum = 0
   for i = 1, string.len(bin) do
     num = string.sub(bin, i,i) == "1" and 1 or 0
     sum = sum + num * math.pow(2, i-1)
   end
   return math.floor(sum)
+end
+
+id_at = function(x,y)
+  return ((y-1)*16)+x
 end
 
 return Stack

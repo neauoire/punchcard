@@ -1,6 +1,19 @@
-
 local Navi = {}
 local g
+
+-- Utils
+
+local pos_at = function(id)
+  return { x = math.floor(id % 16), y = math.floor(id/16)+1  }
+end
+
+local to_hex = function(int)
+  return string.format('%01x',int):upper()
+end
+
+local id_at = function(x,y)
+  return ((y-1)*16)+x
+end
 
 Navi.focus = 1
 Navi.frame = 1
@@ -17,8 +30,7 @@ Navi.start = function(self)
   self:redraw()
 end
 
-Navi.bind = function(self,utils,stack,instruct,operator)
-  self.utils = utils
+Navi.bind = function(self,stack,instruct,operator)
   self.stack = stack
   self.instruct = instruct
   self.operator = operator
@@ -39,7 +51,7 @@ end
 
 Navi.on_grid_key = function(x,y,z)
   if z == 1 then
-    id = Navi.utils.id_at(x,y)
+    local id = id_at(x,y)
     if Navi:in_card() == true then
       if Navi.card == id then
         Navi:leave_card()
@@ -86,7 +98,7 @@ end
 
 Navi.grid_card = function(self)
   -- Active Card
-  pos = pos_at(self.card)
+  local pos = pos_at(self.card)
   if self.operator.senders[self.card] then
     g:led(pos.x,pos.y,10)
   else
@@ -95,7 +107,7 @@ Navi.grid_card = function(self)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
-      is_light = self.stack:read(self.card,self.utils.id_at(x,y))
+      local is_light = self.stack:read(self.card,id_at(x,y))
       if is_light then
         g:led(x,y,15)
       end
@@ -107,8 +119,8 @@ Navi.grid_home = function(self)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
-      id = self.utils.id_at(x,y)
-      is_light = self.stack:known(id)
+      local id = id_at(x,y)
+      local is_light = self.stack:known(id)
       if is_light then
         if self.operator.senders[id] then
           g:led(x,y,10)
@@ -124,10 +136,11 @@ end
 
 Navi.view_card = function(self)
   screen.fill()
-  count = 1
+  local count = 1
   for l=1,16 do
-    name = self.stack:get_line(self.card,l)
-    x = 0 ; y = count*7
+    local name = self.stack:get_line(self.card,l)
+    local x = 0 ; 
+    local y = count*7
     if count > 8 then x = 64 ; y = (count-8)*7 end
     y = y + 2
     if l < 9 or name ~= '' then
@@ -149,11 +162,11 @@ Navi.view_card = function(self)
 end
 
 Navi.view_home = function(self)
-  offset = { x = 30, y = 13, spacing = 4 }
+  local offset = { x = 30, y = 13, spacing = 4 }
   for x=1,16,1 do 
     for y=1,8,1 do 
-      id = self.utils.id_at(x,y)
-      is_light = self.stack:known(id)
+      local id = id_at(x,y)
+      local is_light = self.stack:known(id)
       if is_light then
         if self.operator.senders[id] then
           screen.level(15)
@@ -173,7 +186,7 @@ end
 
 Navi.toggle = function(self,id)
   if self:in_card() ~= true then print('Not in a card') ; return end
-  is_light = self.stack:read(self.card,id)
+  local is_light = self.stack:read(self.card,id)
   self.focus = pos_at(id).x
   if is_light == true then
     self.stack:write(self.card,id,false)
@@ -187,8 +200,7 @@ Navi.run = function(self)
   for id=1,128 do
     self.operator.senders[id] = false
     if self.stack:known(id) == true then
-      operation = self.stack:get_program(id)
-      self.operator:run(id,operation)
+      self.operator:run(id,self.stack:get_program(id))
     end
   end
   self:redraw()
@@ -238,16 +250,6 @@ Navi.metro = metro.init()
 Navi.metro.time = 1.0 / 15
 Navi.metro.event = function()
   Navi:run()
-end
-
--- utils
-
-pos_at = function(id)
-  return { x = math.floor(id % 16), y = math.floor(id/16)+1  }
-end
-
-to_hex = function(int)
-  return string.format('%01x',int):upper()
 end
 
 return Navi
