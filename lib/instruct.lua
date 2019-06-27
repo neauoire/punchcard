@@ -1,9 +1,32 @@
-
-
 local Instruct = { dict = {} }
-local types = {}
 
-types.conditional = 1
+-- Utils
+
+local char_at = function(str,index,length)
+  length = (length or 1)
+  return string.sub(str,index,index+length-1)
+end
+
+local num_to_bin = function(num)
+  local t = {}
+  for b=8,1,-1 do
+    rest = math.fmod(num,2)
+    t[b] = math.floor(rest)
+    num = (num-rest)/2
+  end
+  return table.concat(t)
+end
+
+local num_to_oct = function(num)
+  return ((num-1)%8)+1
+end
+
+local num_to_note = function(num)
+  notes = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+  return notes[((num-1) % 12)+1]
+end
+
+-- Begin
 
 Instruct.init = function(self)
   print('Instruct','Init')
@@ -171,32 +194,6 @@ Instruct.print = function(self)
     count = count + 1
   end
   print(count..' instructs, '..math.floor((count/255)*100)..'% coverage')
-end
-
--- Utils
-
-char_at = function(str,index,length)
-  length = (length or 1)
-  return string.sub(str,index,index+length-1)
-end
-
-num_to_bin = function(num)
-  local t = {}
-  for b=8,1,-1 do
-    rest = math.fmod(num,2)
-    t[b] = math.floor(rest)
-    num = (num-rest)/2
-  end
-  return table.concat(t)
-end
-
-num_to_oct = function(num)
-  return ((num-1)%8)+1
-end
-
-num_to_note = function(num)
-  notes = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
-  return notes[((num-1) % 12)+1]
 end
 
 return Instruct

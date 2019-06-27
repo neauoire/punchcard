@@ -1,5 +1,28 @@
 local Operator = { senders = {} }
 
+-- Utils
+
+local limit = function(val,length)
+  return ((val-1) % length)+1
+end
+
+local clamp = function(val,min,max)
+  return val < min and min or val > max and max or val
+end
+
+local index_of = function(list,value)
+  for i=1,#list do
+    if list[i] == value then return i end
+  end
+  return -1
+end
+
+local note_to_num = function(note)
+  return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
+end
+
+-- Begin
+
 Operator.init = function(self)
   
 end
@@ -89,27 +112,6 @@ function split_lines(str)
     table.insert(res,token)
   end
   return res
-end
-
--- Utils
-
-limit = function(val,length)
-  return ((val-1) % length)+1
-end
-
-clamp = function(val,min,max)
-  return val < min and min or val > max and max or val
-end
-
-note_to_num = function(note)
-  return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
-end
-
-index_of = function(list,value)
-  for i=1,#list do
-    if list[i] == value then return i end
-  end
-  return -1
 end
 
 return Operator

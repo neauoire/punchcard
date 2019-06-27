@@ -1,4 +1,4 @@
-local Navi = {}
+local Navi = { focus = 1, frame = 1, is_playing = true}
 local g
 
 -- Utils
@@ -15,9 +15,7 @@ local id_at = function(x,y)
   return ((y-1)*16)+x
 end
 
-Navi.focus = 1
-Navi.frame = 1
-Navi.is_playing = true
+-- Begin
 
 Navi.init = function(self)
   print('Control','Init')
