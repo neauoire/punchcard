@@ -1,5 +1,4 @@
-local Navi = { focus = 1, frame = 1, is_playing = true}
-local g
+local Navi = { focus = 1, frame = 1, is_playing = true, grid = nil }
 
 -- Utils
 
@@ -25,7 +24,7 @@ end
 Navi.start = function(self)
   self:set_bpm(120)
   Navi.metro:start()
-  self:redraw()
+  redraw()
 end
 
 Navi.bind = function(self,stack,instructor,operator)
@@ -36,13 +35,13 @@ end
 
 Navi.connect = function(self)
   print('Navi','Connecting..')
-  g = grid.connect()
-  g.key = self.on_grid_key
+  self.grid = grid.connect()
+  self.grid.key = self.on_grid_key
   print('Navi','Connected')
 end
 
 Navi.is_connected = function(self)
-  return g.device ~= nil
+  return self.grid.device ~= nil
 end
 
 Navi.on_grid_key = function(x,y,z)
@@ -72,14 +71,14 @@ Navi.play = function(self)
   print('play')
   self.is_playing = true
   Navi.metro:start()
-  self:redraw()
+  redraw()
 end
 
 Navi.stop = function(self)
   print('stop')
   self.is_playing = false
   Navi.metro:stop()
-  self:redraw()
+  redraw()
 end
 
 -- 
@@ -88,16 +87,16 @@ Navi.grid_card = function(self)
   -- Active Card
   local pos = pos_at(self.card)
   if self.operator.senders[self.card] then
-    g:led(pos.x,pos.y,10)
+    self.grid:led(pos.x,pos.y,10)
   else
-    g:led(pos.x,pos.y,5)
+    self.grid:led(pos.x,pos.y,5)
   end
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
       local is_light = self.stack:read(self.card,id_at(x,y))
       if is_light then
-        g:led(x,y,15)
+        self.grid:led(x,y,15)
       end
     end
   end 
@@ -111,9 +110,9 @@ Navi.grid_home = function(self)
       local is_light = self.stack:known(id)
       if is_light then
         if self.operator.senders[id] then
-          g:led(x,y,10)
+          self.grid:led(x,y,10)
         else
-          g:led(x,y,5)
+          self.grid:led(x,y,5)
         end
       end
     end
@@ -189,12 +188,12 @@ Navi.toggle = function(self,id)
   else
     self.stack:write(self.card,id,true)
   end
-  self:redraw()
+  redraw()
 end
 
 Navi.run = function(self)
   self.operator:run()
-  self:redraw()
+  redraw()
   self.frame = self.frame + 1
 end
 
@@ -204,13 +203,13 @@ Navi.enter_card = function(self,id)
   print('enter '..id)
   Navi.focus = 1
   Navi.card = id
-  Navi:redraw()
+  redraw()
 end
 
 Navi.leave_card = function(self)
   print('leave '..Navi.card)
   Navi.card = nil
-  Navi:redraw()
+  redraw()
 end
 
 Navi.get_bangs = function(self,id)
@@ -236,22 +235,6 @@ end
 
 Navi.in_card = function(self)
   return self.card ~= nil
-end
-
-Navi.redraw = function(self)
-  g:all(0)
-  screen.clear()
-  if self:is_connected() ~= true then
-    self:view_error()
-  elseif self:in_card() then
-    self:grid_card()
-    self:view_card()
-  else
-    self:grid_home()
-    self:view_home()
-  end
-  g:refresh()
-  screen.update()
 end
 
 -- Metro

@@ -44,4 +44,22 @@ function key(id,state)
 end
 
 function enc(id,delta)
+  
 end
+
+function redraw()
+  navi.grid:all(0)
+  screen.clear()
+  if navi:is_connected() ~= true then
+    navi:view_error()
+  elseif navi:in_card() then
+    navi:grid_card()
+    navi:view_card()
+  else
+    navi:grid_home()
+    navi:view_home()
+  end
+  navi.grid:refresh()
+  screen.update()
+end
+

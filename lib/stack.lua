@@ -103,7 +103,7 @@ Stack.erase_card = function(self,id)
   for i=1,128 do
     self.cards[id][i] = false
   end
-  self.navi:redraw()
+  redraw()
 end
 
 return Stack
