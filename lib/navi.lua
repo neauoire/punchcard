@@ -199,7 +199,7 @@ end
 Navi.run = function(self)
   self.operator:run()
   self:redraw()
-  self.frame = ((self.frame-1)%16)+1
+  self.frame = self.frame + 1
 end
 
 -- 
@@ -240,6 +240,10 @@ end
 Navi.set_bpm = function(self,bpm)
   self.bpm = bpm
   self.metro.time = 60 / (self.bpm*2)
+end
+
+Navi.get_step = function(self)
+  return ((self.frame-1)%16)+1
 end
 
 Navi.metro = metro.init()

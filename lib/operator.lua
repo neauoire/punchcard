@@ -50,7 +50,7 @@ end
 Operator.run_card = function(self,id,instructions)
   print('===== '..id)
   -- Defaults
-  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi.frame }
+  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step() }
 
   for id=1,#instructions do
     local i = instructions[id]
@@ -92,7 +92,7 @@ end
 Operator.IF = function(self,key,val,res)
   res.skip = false
   if key == 'STEP' then
-    if tonumber(val) ~= limit(self.navi.frame,val) then res.skip = true end
+    if tonumber(val) ~= limit(res.STEP,tonumber(val)) then res.skip = true end
   elseif key == 'NOTE' then
     if tonumber(res[key]) ~= note_to_num(val) then res.skip = true end
   else 
