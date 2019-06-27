@@ -12,12 +12,9 @@ local stack = include('lib/stack')
 local instructor = include('lib/instructor')
 local operator = include('lib/operator')
 
-engine.name = "PolyPerc"
-
 -- Main
 
 function init()
-  engine.release(3)
   -- Setup
   navi:bind(stack,instructor,operator)
   stack:bind(instructor)
@@ -26,6 +23,7 @@ function init()
   stack:init()
   navi:init()
   instructor:init()
+  operator:init()
   -- Render Style
   screen.level(15)
   screen.aa(0)

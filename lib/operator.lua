@@ -1,4 +1,4 @@
-local Operator = { senders = {}, bangs = {} }
+local Operator = { senders = {}, bangs = {}, midi = {} }
 
 -- Utils
 
@@ -32,7 +32,7 @@ end
 -- Begin
 
 Operator.init = function(self)
-  
+  self.midi_signal = midi.connect(1)
 end
 
 Operator.bind = function(self,navi,stack,instructor)
@@ -79,8 +79,9 @@ end
 
 Operator.run = function(self)
   self:reset()
-  local cards = self.stack:get_cards()
-  self:run_cards(cards)
+  self:release_midi()
+  self:run_cards(self.stack:get_cards())
+  self:send_midi()
 end
 
 Operator.IF = function(self,key,val,res)
@@ -110,9 +111,10 @@ Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
   if key == 'CHAN' then
     if res.NOTE == nil then return end
+    local value = res.NOTE+(res.OCT*12)
+    local velocity = math.floor((tonumber(res.VEL)/16)*127)
     self.senders[res.id] = true
-    engine.hz(midi_to_hz(res.NOTE+(res.OCT*12)))
-    print('SEND: '..res.NOTE+(res.OCT*12)..' VEL: '..math.floor((res.VEL/16)*127)..' '..key..': '..val)
+    self:insert_midi(value,velocity,val)
   elseif key == 'OSC' then
     self.senders[res.id] = true
     print('SEND: '..key..': '..val)
@@ -141,6 +143,37 @@ Operator.DO = function(self,key,val,res)
   end
   if key == 'LIMIT' then
     res[res.LAST] = limit(tonumber(res[res.LAST]),tonumber(val))
+  end
+end
+
+-- Midi
+
+Operator.duplicated_midi = function(self,note,channel)
+  for id=1,#self.midi do
+    if self.midi[id].note == note and self.midi[id].channel == channel then
+      return true
+    end
+  end
+  return false
+end
+
+Operator.insert_midi = function(self,note,velocity,channel)
+  if self:duplicated_midi(note,channel) then
+    return
+  end
+  table.insert(self.midi,{note = note,velocity = velocity,channel = channel})
+end
+
+Operator.release_midi = function(self)
+  while #self.midi > 0 do
+    self.midi_signal:note_off(self.midi[1].note,self.midi[1].velocity,self.midi[1].channel)
+    table.remove(self.midi)
+  end
+end
+
+Operator.send_midi = function(self)
+  for id=1,#self.midi do
+    self.midi_signal:note_on(self.midi[id].note,self.midi[id].velocity,self.midi[id].channel)
   end
 end
 
