@@ -17,7 +17,8 @@ Navi.start = function(self)
   self:redraw()
 end
 
-Navi.bind = function(self,stack,instruct,operator)
+Navi.bind = function(self,utils,stack,instruct,operator)
+  self.utils = utils
   self.stack = stack
   self.instruct = instruct
   self.operator = operator
@@ -38,7 +39,7 @@ end
 
 Navi.on_grid_key = function(x,y,z)
   if z == 1 then
-    id = id_at(x,y)
+    id = Navi.utils.id_at(x,y)
     if Navi:in_card() == true then
       if Navi.card == id then
         Navi:leave_card()
@@ -94,7 +95,7 @@ Navi.grid_card = function(self)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
-      is_light = self.stack:read(self.card,id_at(x,y))
+      is_light = self.stack:read(self.card,self.utils.id_at(x,y))
       if is_light then
         g:led(x,y,15)
       end
@@ -106,7 +107,7 @@ Navi.grid_home = function(self)
   -- Draw Bytes
   for x=1,16 do
     for y=1,8 do
-      id = id_at(x,y)
+      id = self.utils.id_at(x,y)
       is_light = self.stack:known(id)
       if is_light then
         if self.operator.senders[id] then
@@ -151,7 +152,7 @@ Navi.view_home = function(self)
   offset = { x = 30, y = 13, spacing = 4 }
   for x=1,16,1 do 
     for y=1,8,1 do 
-      id = id_at(x,y)
+      id = self.utils.id_at(x,y)
       is_light = self.stack:known(id)
       if is_light then
         if self.operator.senders[id] then
@@ -237,6 +238,16 @@ Navi.metro = metro.init()
 Navi.metro.time = 1.0 / 15
 Navi.metro.event = function()
   Navi:run()
+end
+
+-- utils
+
+pos_at = function(id)
+  return { x = math.floor(id % 16), y = math.floor(id/16)+1  }
+end
+
+to_hex = function(int)
+  return string.format('%01x',int):upper()
 end
 
 return Navi

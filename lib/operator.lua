@@ -4,7 +4,8 @@ Operator.init = function(self)
   
 end
 
-Operator.bind = function(self,navi)
+Operator.bind = function(self,utils,navi)
+  self.utils = utils
   self.navi = navi
 end
 
@@ -38,7 +39,7 @@ Operator.IF = function(self,key,val,res)
   if key == 'STEP' then
     if tonumber(val) ~= limit(self.navi.frame,val) then res.skip = true end
   elseif key == 'NOTE' then
-    if tonumber(res[key]) ~= note_to_num(val) then res.skip = true end
+    if tonumber(res[key]) ~= self.utils.note_to_num(val) then res.skip = true end
   else 
     if tonumber(res[key]) ~= tonumber(val) then res.skip = true end
   end
@@ -47,7 +48,7 @@ end
 Operator.SET = function(self,key,val,res)
   if res.skip == true then return end
   if key == 'NOTE' then
-    res.NOTE = math.floor(note_to_num(val))
+    res.NOTE = math.floor(self.utils.note_to_num(val))
   else
     res[key] = val
   end
@@ -89,6 +90,16 @@ function split_lines(str)
     table.insert(res,token)
   end
   return res
+end
+
+-- Utils
+
+limit = function(val,length)
+  return ((val-1) % length)+1
+end
+
+clamp = function(val,min,max)
+  return val < min and min or val > max and max or val
 end
 
 return Operator

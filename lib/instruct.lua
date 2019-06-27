@@ -14,7 +14,8 @@ Instruct.init = function(self)
   self:build()
 end
 
-Instruct.bind = function(self,program)
+Instruct.bind = function(self,utils,program)
+  self.utils = utils
   self.program = program
 end
 
@@ -175,6 +176,23 @@ Instruct.print = function(self)
     count = count + 1
   end
   print(count..' instructs, '..math.floor((count/255)*100)..'% coverage')
+end
+
+-- Utils
+
+char_at = function(str,index,length)
+  length = length or 1
+  return string.sub(bin,index,index+length-1)
+end
+
+num_to_bin = function(num)
+  local t={}
+  for b=8,1,-1 do
+    rest=math.fmod(num,2)
+    t[b]=math.floor(rest)
+    num=(num-rest)/2
+  end
+  return table.concat(t)
 end
 
 return Instruct
