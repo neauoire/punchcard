@@ -136,24 +136,22 @@ Navi.view_card = function(self)
   screen.fill()
   local count = 1
   for l=1,16 do
-    local name = self.stack:get_line(self.card,l)
+    local instruction = self.stack:get_instruction(self.card,l)
     local x = 0 ; 
     local y = count*7
     if count > 8 then x = 64 ; y = (count-8)*7 end
     y = y + 2
-    if l < 9 or name ~= '' then
-      screen.level(5)
-      screen.move(x,y)
-      if l == self.focus then
-        screen.text('>')
-      else
-        screen.text(to_hex(l-1))
-      end
-      screen.fill()
+    screen.level(5)
+    screen.move(x,y)
+    if l == self.focus then
+      screen.text('>')
+    else
+      screen.text(to_hex(l-1))
     end
+    screen.fill()
     screen.level(15)
     screen.move(x+6,y)
-    screen.text(name)
+    screen.text(instruction)
     screen.fill()
     count = count + 1
   end
@@ -195,14 +193,9 @@ Navi.toggle = function(self,id)
 end
 
 Navi.run = function(self)
-  for id=1,128 do
-    self.operator.senders[id] = false
-    if self.stack:known(id) == true then
-      self.operator:run(id,self.stack:get_program(id))
-    end
-  end
+  self.operator:run()
   self:redraw()
-  self.frame = self.frame + 1
+  self.frame = ((self.frame-1)%16)+1
 end
 
 -- 

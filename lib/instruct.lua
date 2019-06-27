@@ -54,7 +54,7 @@ Instruct.build_if = function(self,id,bin)
   end
 
   if _type and _value then
-    self.dict[id] = { name = 'IF '.._type..'='.._value }
+    self.dict[id] = { cmd = 'IF', key = _type, val = _value, name = 'IF '.._type..'='.._value }
   else
     print('Incomplete IF instruction: '..bin, _type,_value)
   end
@@ -79,7 +79,7 @@ Instruct.build_set = function(self,id,bin)
   end
   
   if _type and _value then
-    self.dict[id] = { name = 'SET '.._type..'='.._value }
+    self.dict[id] = { cmd = 'SET', key = _type, val = _value, name = 'SET '.._type..'='.._value }
   else
     print('Incomplete SET instruction: '..bin)
   end
@@ -99,7 +99,7 @@ Instruct.build_send = function(self,id,bin)
   local _value = self:make_number(id,bin)
   
   if _type and _value then
-    self.dict[id] = { name = 'SEND '.._type..'>'.._value }
+    self.dict[id] = { cmd = 'SEND', key = _type, val = _value, name = 'SEND '.._type..'>'.._value }
   else
     print('Incomplete SEND instruction: '..bin)
   end
@@ -122,7 +122,7 @@ Instruct.build_do = function(self,id,bin)
   end
 
   if _type and _value then
-    self.dict[id] = { name = 'DO '.._type..':'.._value }
+    self.dict[id] = { cmd = 'DO', key = _type, val = _value, name = 'DO '.._type..':'.._value }
   else
     print('Incomplete DO instruction: '..bin)
   end
@@ -176,6 +176,10 @@ Instruct.build = function(self)
 end
 
 -- Utils
+
+Instruct.get = function(self,id)
+  return self.dict[id]
+end
 
 Instruct.get_name = function(self,num)
   if self.dict[num] then

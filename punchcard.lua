@@ -19,7 +19,7 @@ function init()
   navi:bind(stack,instruct,operator)
   stack:bind(instruct)
   instruct:bind()
-  operator:bind(navi)
+  operator:bind(navi,stack,instruct)
   -- Init
   stack:init()
   navi:init()

@@ -65,23 +65,30 @@ Stack.known = function(self,id)
   return false
 end
 
-Stack.get_line = function(self,id,line_id)
+Stack.get_cards = function(self)
+  local cards = {}
+  for id=1,128 do
+    if self:known(id) == true then
+      table.insert(cards,id)
+    end
+  end
+  return cards
+end
+
+Stack.get_instruction = function(self,id,line_id)
   res = {}
   for y=1,8 do
     table.insert(res,self:read(id,id_at(line_id,y)))
   end
-  return self.instruct:get_name(bin_to_num(line_to_bin(res)))
+  return bin_to_num(line_to_bin(res))
 end
 
-Stack.get_program = function(self,id)
-  local str = ''
+Stack.get_instructions = function(self,id)
+  local a = {}
   for y=1,16 do
-    local name = self:get_line(id,y)
-    if name ~= '' and name ~= '--' then
-      str = str..name..';'
-    end
+    table.insert(a,self:get_instruction(id,y))
   end
-  return str
+  return a
 end
 
 Stack.get_card = function(self,id)

@@ -27,19 +27,52 @@ Operator.init = function(self)
   
 end
 
-Operator.bind = function(self,navi)
+Operator.bind = function(self,navi,stack,instruct)
   self.navi = navi
+  self.stack = stack
+  self.instruct = instruct
 end
 
-Operator.run = function(self,id,program)
+Operator.reset = function(self)
+  for id=1,128 do
+    self.senders[id] = false
+  end
+end
+
+Operator.run_instruction = function(self,instruction,res)
+  if Operator[instruction.cmd] ~= nil then
+    Operator[instruction.cmd](self,instruction.key,instruction.val,res)
+  else
+    print('Unknown CMD:'..cmd)
+  end
+end
+
+Operator.run_card = function(self,id,instructions)
   print('===== '..id)
   -- Defaults
-  res = { id = id, OCT = 5, STEP = tostring(((self.navi.frame-1)%16)+1), VEL = 16 }
-  -- Each line
-  for token in string.gmatch(program, "[^;]+") do
-    self:parse(token,res)
+  res = { id = id, OCT = 5, VEL = 16, STEP = self.navi.frame }
+
+  for id=1,#instructions do
+    local i = instructions[id]
+    if i > 0 then
+      local instruction = self.instruct:get(i)
+      self:run_instruction(instruction,res)
+    end
   end
-  self:render(res)
+end
+
+Operator.run_cards = function(self,cards)
+  for i=1,#cards do
+    local id = cards[i]
+    local instructions = self.stack:get_instructions(id)
+    self:run_card(id,instructions)
+  end  
+end
+
+Operator.run = function(self)
+  self:reset()
+  local cards = self.stack:get_cards()
+  self:run_cards(cards)
 end
 
 Operator.parse = function(self,line,res)
