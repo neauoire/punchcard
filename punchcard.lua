@@ -9,21 +9,21 @@
 
 local navi = include('lib/navi')
 local stack = include('lib/stack')
-local instruct = include('lib/instruct')
+local instructor = include('lib/instructor')
 local operator = include('lib/operator')
 
 -- Main
 
 function init()
   -- Setup
-  navi:bind(stack,instruct,operator)
-  stack:bind(instruct)
-  instruct:bind()
-  operator:bind(navi,stack,instruct)
+  navi:bind(stack,instructor,operator)
+  stack:bind(instructor)
+  instructor:bind()
+  operator:bind(navi,stack,instructor)
   -- Init
   stack:init()
   navi:init()
-  instruct:init()
+  instructor:init()
   -- Render Style
   screen.level(15)
   screen.aa(0)

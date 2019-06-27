@@ -1,4 +1,4 @@
-local Instruct = { dict = {} }
+local Instructor = { dict = {} }
 
 -- Utils
 
@@ -28,25 +28,25 @@ end
 
 -- Begin
 
-Instruct.init = function(self)
-  print('Instruct','Init')
+Instructor.init = function(self)
+  print('Instructor','Init')
   self:build()
 end
 
-Instruct.bind = function(self,program)
+Instructor.bind = function(self,program)
   self.program = program
 end
 
 -- IF
 
-Instruct.make_if_type = function(self,id,bin)
+Instructor.make_if_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'BANG'
   elseif char_at(bin,5) == '1' then return 'STEP'
   elseif char_at(bin,6) == '1' then return 'OCT'
   else return 'NOTE' end
 end
 
-Instruct.build_if = function(self,id,bin)
+Instructor.build_if = function(self,id,bin)
   local _type = self:make_if_type(id,bin)
   local _value = self:make_number(id,bin)
   if _type == 'NOTE' then
@@ -62,14 +62,14 @@ end
 
 -- SET
 
-Instruct.make_set_type = function(self,id,bin)
+Instructor.make_set_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'RATE'
   elseif char_at(bin,5) == '1' then return 'VEL'
   elseif char_at(bin,6) == '1' then return 'OCT'
   else return 'NOTE' end
 end
 
-Instruct.build_set = function(self,id,bin)
+Instructor.build_set = function(self,id,bin)
   local _type = self:make_set_type(id,bin)
   local _value = self:make_number(id,bin)
   if _type == 'NOTE' then
@@ -87,14 +87,14 @@ end
 
 -- SEND
 
-Instruct.make_send_type = function(self,id,bin)
+Instructor.make_send_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'SYS'
   elseif char_at(bin,5) == '1' then return 'BANG'
   elseif char_at(bin,6) == '1' then return 'OSC'
   else return 'CHAN' end
 end
 
-Instruct.build_send = function(self,id,bin)
+Instructor.build_send = function(self,id,bin)
   local _type = self:make_send_type(id,bin)
   local _value = self:make_number(id,bin)
   
@@ -107,14 +107,14 @@ end
 
 -- WHEN
 
-Instruct.make_do_type = function(self,id,bin)
+Instructor.make_do_type = function(self,id,bin)
   if char_at(bin,5,2) == '11' then return 'CLAMP'
   elseif char_at(bin,5) == '1' then return 'INCR'
   elseif char_at(bin,6) == '1' then return 'DECR'
   else return 'LIMIT' end
 end
 
-Instruct.build_do = function(self,id,bin)
+Instructor.build_do = function(self,id,bin)
   local _type = self:make_do_type(id,bin)
   local _value = self:make_number(id,bin)
   if _type == 'NOTE' then 
@@ -130,14 +130,14 @@ end
 
 -- Generics
 
-Instruct.make_octave = function(self,id,bin)
+Instructor.make_octave = function(self,id,bin)
   local key = self:make_number(id,bin)
   if key == 10 then return 'INC' end
   if key ==  9 then return 'DEC' end
   return math.floor(((key-1) % 8)+1)
 end
 
-Instruct.make_number = function(self,id,bin)
+Instructor.make_number = function(self,id,bin)
   if char_at(bin,1,4) == '0000' then return 1 end
   if char_at(bin,1,4) == '0001' then return 2 end
   if char_at(bin,1,4) == '0010' then return 3 end
@@ -157,7 +157,7 @@ Instruct.make_number = function(self,id,bin)
   return '0'
 end
 
-Instruct.build = function(self)
+Instructor.build = function(self)
   print('Instruct','Building..')
   for id=1,255 do
     local bin = num_to_bin(id)
@@ -172,32 +172,27 @@ Instruct.build = function(self)
     end
   end
   print('Instruct','Completed.')
-  self:print()
 end
 
 -- Utils
 
-Instruct.get = function(self,id)
+Instructor.get = function(self,id)
   return self.dict[id]
 end
 
-Instruct.get_name = function(self,num)
+Instructor.name = function(self,instruction)
+  if instruction == nil then return 'ERROR' end
+  if instruction.cmd == nil then return 'ERROR:CMD' end
+  if instruction.key == nil then return 'ERROR:KEY' end
+  if instruction.val == nil then return 'ERROR:VAL' end
+  return instruction.cmd..instruction.key..instruction.val
+end
+
+Instructor.get_name = function(self,num)
   if self.dict[num] then
     return self.dict[num].name
   end
   return '--'
 end
 
-Instruct.print = function(self)
-  local collection = {}
-  for id=1,255 do collection[self:get_name(id)] = id end
-  local count = 0
-  for k, v in pairs(collection) do
-    -- local bin = num_to_bin(v)
-    -- print(bin..' '..k)
-    count = count + 1
-  end
-  print(count..' instructs, '..math.floor((count/255)*100)..'% coverage')
-end
-
-return Instruct
+return Instructor

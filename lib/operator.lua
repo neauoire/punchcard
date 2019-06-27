@@ -27,10 +27,10 @@ Operator.init = function(self)
   
 end
 
-Operator.bind = function(self,navi,stack,instruct)
+Operator.bind = function(self,navi,stack,instructor)
   self.navi = navi
   self.stack = stack
-  self.instruct = instruct
+  self.instructor = instructor
 end
 
 Operator.reset = function(self)
@@ -55,7 +55,7 @@ Operator.run_card = function(self,id,instructions)
   for id=1,#instructions do
     local i = instructions[id]
     if i > 0 then
-      local instruction = self.instruct:get(i)
+      local instruction = self.instructor:get(i)
       self:run_instruction(instruction,res)
     end
   end

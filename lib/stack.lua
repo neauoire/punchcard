@@ -31,8 +31,8 @@ Stack.init = function(self)
   self:build()
 end
 
-Stack.bind = function(self,instruct)
-  self.instruct = instruct
+Stack.bind = function(self,instructor)
+  self.instructor = instructor
 end
 
 Stack.build = function(self)

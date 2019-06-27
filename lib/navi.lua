@@ -8,7 +8,7 @@ local pos_at = function(id)
 end
 
 local to_hex = function(int)
-  return string.format('%01x',int):upper()
+  return string.format('%02x',int):upper()
 end
 
 local id_at = function(x,y)
@@ -28,9 +28,9 @@ Navi.start = function(self)
   self:redraw()
 end
 
-Navi.bind = function(self,stack,instruct,operator)
+Navi.bind = function(self,stack,instructor,operator)
   self.stack = stack
-  self.instruct = instruct
+  self.instructor = instructor
   self.operator = operator
 end
 
@@ -136,7 +136,8 @@ Navi.view_card = function(self)
   screen.fill()
   local count = 1
   for l=1,16 do
-    local instruction = self.stack:get_instruction(self.card,l)
+    local inst_id = self.stack:get_instruction(self.card,l)
+    local instruction = self.instructor:get(inst_id)
     local x = 0 ; 
     local y = count*7
     if count > 8 then x = 64 ; y = (count-8)*7 end
@@ -144,14 +145,17 @@ Navi.view_card = function(self)
     screen.level(5)
     screen.move(x,y)
     if l == self.focus then
-      screen.text('>')
+      screen.text(' >')
     else
-      screen.text(to_hex(l-1))
+      screen.text(to_hex(inst_id))
     end
     screen.fill()
     screen.level(15)
-    screen.move(x+6,y)
-    screen.text(instruction)
+    if instruction then
+      name = self.instructor:name(instruction)
+      screen.move(x+11,y)
+      screen.text(name)
+    end
     screen.fill()
     count = count + 1
   end
@@ -202,6 +206,7 @@ end
 
 Navi.enter_card = function(self,id)
   print('enter '..id)
+  Navi.focus = 1
   Navi.card = id
   Navi:redraw()
 end
