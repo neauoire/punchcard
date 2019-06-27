@@ -3,9 +3,6 @@
 local Instruct = { dict = {} }
 local types = {}
 
-
-local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
-
 types.conditional = 1
 
 Instruct.init = function(self)
@@ -28,16 +25,15 @@ end
 
 Instruct.build_if = function(self,id,bin)
   local _type = self:make_if_type(id,bin)
+  local _value = self:make_number(id,bin)
   if _type == 'NOTE' then
-    local _value = self:make_note(id,bin)
-  else
-    local _value = self:make_number(id,bin)
+    _value = num_to_note(_value)
   end
 
   if _type and _value then
     self.dict[id] = { name = 'IF '.._type..'='.._value }
   else
-    print('Incomplete IF instruction: '..bin)
+    print('Incomplete IF instruction: '..bin, _type,_value)
   end
 end
 
@@ -52,12 +48,11 @@ end
 
 Instruct.build_set = function(self,id,bin)
   local _type = self:make_set_type(id,bin)
+  local _value = self:make_number(id,bin)
   if _type == 'NOTE' then
-    local _value = self:make_note(id,bin)
+    _value = num_to_note(_value)
   elseif _type == 'OCT' then
-    local _value = self:make_octave(id,bin)
-  else
-    local _value = self:make_number(id,bin)
+    _value = num_to_oct(_value)
   end
   
   if _type and _value then
@@ -98,10 +93,9 @@ end
 
 Instruct.build_do = function(self,id,bin)
   local _type = self:make_do_type(id,bin)
-  if _type == 'NOTE' then
-    local _value = self:make_note(id,bin)
-  else
-    local _value = self:make_number(id,bin)
+  local _value = self:make_number(id,bin)
+  if _type == 'NOTE' then 
+    _value = num_to_note(_value)
   end
 
   if _type and _value then
@@ -112,19 +106,6 @@ Instruct.build_do = function(self,id,bin)
 end
 
 -- Generics
-
-Instruct.make_note = function(self,id,bin)
-  local key = self:make_number(id,bin)
-  if key == 16 then return 'NEXT^' end
-  if key == 15 then return 'PREV^' end
-  if key == 14 then return 'NEXT#' end
-  if key == 13 then return 'PREV#' end
-  if key == 12 then return 'NEXT' end
-  if key == 11 then return 'PREV' end
-  if key == 10 then return 'INC' end
-  if key ==  9 then return 'DEC' end
-  return OCTAVE[((key-1) % 12)+1]
-end
 
 Instruct.make_octave = function(self,id,bin)
   local key = self:make_number(id,bin)
@@ -180,10 +161,6 @@ Instruct.get_name = function(self,num)
   return '--'
 end
 
-Instruct.operate = function(self,op)
-  
-end
-
 Instruct.print = function(self)
   local collection = {}
   for id=1,255 do collection[self:get_name(id)] = id end
@@ -211,6 +188,15 @@ num_to_bin = function(num)
     num = (num-rest)/2
   end
   return table.concat(t)
+end
+
+num_to_oct = function(num)
+  return ((num-1)%8)+1
+end
+
+num_to_note = function(num)
+  notes = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+  return notes[((num-1) % 12)+1]
 end
 
 return Instruct
