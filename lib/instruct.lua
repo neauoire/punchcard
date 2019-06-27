@@ -1,13 +1,8 @@
 
-local Instruct = {}
+local Instruct = { dict = {} }
 local types = {}
-types.conditional = 1
 
-Instruct.dict = {}
-Instruct.dict[0] = {
-  name = '',
-  run = function()end
-}
+types.conditional = 1
 
 Instruct.init = function(self)
   print('Instruct','Init')
