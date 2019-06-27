@@ -23,7 +23,7 @@ Navi.init = function(self)
 end
 
 Navi.start = function(self)
-  self:set_bpm(20)
+  self:set_bpm(120)
   Navi.metro:start()
   self:redraw()
 end
@@ -230,7 +230,7 @@ Navi.get_bangs = function(self,id)
   if self.operator.bangs[north_west] then ns[self.operator.bangs[north_west]] = true end
   if self.operator.bangs[north] then ns[self.operator.bangs[north]] = true end
   if self.operator.bangs[north_east] then ns[self.operator.bangs[north_east]] = true end
-  
+
   return ns
 end
 
