@@ -182,6 +182,12 @@ Navi.view_home = function(self)
   end
 end
 
+Navi.view_error = function(self)
+  screen.move(0,10)
+  screen.text('Grid is not connected.')
+  screen.fill()
+end
+
 -- 
 
 Navi.toggle = function(self,id)
@@ -241,7 +247,9 @@ end
 Navi.redraw = function(self)
   g:all(0)
   screen.clear()
-  if self:in_card() then
+  if self:is_connected() ~= true then
+    self:view_error()
+  elseif self:in_card() then
     self:grid_card()
     self:view_card()
   else
