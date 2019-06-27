@@ -274,4 +274,3 @@ A norns sequencer/computer with 255 instructions.
 - BREAK
 - INCR/DECR
 - MAJUP/MAJDOWN
-- RANDOM

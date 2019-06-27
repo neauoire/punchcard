@@ -1,5 +1,7 @@
 local Operator = { senders = {}, bangs = {}, midi = {} }
 
+local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+
 -- Utils
 
 local pos_at = function(id)
@@ -22,6 +24,7 @@ local index_of = function(list,value)
 end
 
 local note_to_num = function(note)
+  if note == 'RAND' then note = OCTAVE[math.random(#OCTAVE)] end
   return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
 end
 
@@ -117,15 +120,13 @@ Operator.SEND = function(self,key,val,res)
     self:insert_midi(value,velocity,val)
   elseif key == 'OSC' then
     self.senders[res.id] = true
-    print('SEND: '..key..': '..val)
   elseif key == 'BANG' then
     self.senders[res.id] = true
     self.bangs[res.id] = val
-    print('SEND: '..key..': '..val)
   elseif key == 'SYS' then
     self.senders[res.id] = true
-    print('SEND: '..key..': '..val)
   end
+  print('SEND: '..key..': '..val)
 end
 
 Operator.DO = function(self,key,val,res)

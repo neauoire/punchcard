@@ -1,5 +1,7 @@
 local Instructor = { dict = {} }
 
+local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+
 -- Utils
 
 local char_at = function(str,index,length)
@@ -22,8 +24,8 @@ local num_to_oct = function(num)
 end
 
 local num_to_note = function(num)
-  notes = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
-  return notes[((num-1) % 12)+1]
+  if num == 16 then return 'RAND' end -- RAND
+  return OCTAVE[((num-1) % 12)+1]
 end
 
 -- Begin
