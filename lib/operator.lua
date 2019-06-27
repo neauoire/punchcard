@@ -161,7 +161,7 @@ Operator.insert_midi = function(self,note,velocity,channel)
   if self:duplicated_midi(note,channel) then
     return
   end
-  table.insert(self.midi,{note = note,velocity = velocity,channel = channel})
+  table.insert(self.midi,{note = clamp(note,0,127),velocity = velocity,channel = channel})
 end
 
 Operator.release_midi = function(self)

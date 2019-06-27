@@ -38,8 +38,6 @@ Navi.connect = function(self)
   print('Navi','Connecting..')
   g = grid.connect()
   g.key = self.on_grid_key
-  g.add = self.on_grid_add
-  g.remove = self.on_grid_remove
   print('Navi','Connected')
 end
 
@@ -60,14 +58,6 @@ Navi.on_grid_key = function(x,y,z)
       Navi:enter_card(id)
     end
   end
-end
-
-Navi.on_grid_add = function(self,g)
-  print('on_add')
-end
-
-Navi.on_grid_remove = function(self,g)
-  print('on_remove')
 end
 
 Navi.toggle_play = function(self)

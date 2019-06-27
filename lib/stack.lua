@@ -31,7 +31,8 @@ Stack.init = function(self)
   self:build()
 end
 
-Stack.bind = function(self,instructor)
+Stack.bind = function(self,navi,instructor)
+  self.navi = navi
   self.instructor = instructor
 end
 
@@ -93,6 +94,15 @@ end
 
 Stack.get_card = function(self,id)
   return self.cards[id]
+end
+
+Stack.erase_card = function(self,id)
+  id = id or self.navi.card
+  print('erase',id)
+  for i=1,128 do
+    self.cards[id][i] = false
+  end
+  self.navi:redraw()
 end
 
 return Stack

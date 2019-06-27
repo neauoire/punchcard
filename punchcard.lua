@@ -17,7 +17,7 @@ local operator = include('lib/operator')
 function init()
   -- Setup
   navi:bind(stack,instructor,operator)
-  stack:bind(instructor)
+  stack:bind(navi,instructor)
   operator:bind(navi,stack,instructor)
   -- Init
   stack:init()
@@ -30,4 +30,18 @@ function init()
   screen.line_width(1)
   -- Ready
   navi:start()
+end
+
+-- Interactions
+
+function key(id,state)
+  if id == 2 and state == 1 then
+    stack:erase_card()
+  end
+  if id == 3 and state == 1 then
+    navi:toggle_play()
+  end
+end
+
+function enc(id,delta)
 end

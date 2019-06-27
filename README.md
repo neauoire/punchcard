@@ -2,6 +2,11 @@
 
 A norns sequencer/computer with 255 instructions.
 
+## Controls
+
+- K2, erase card.
+- K3, toggle play/stop.
+
 ## Commands
 
 ```
@@ -270,4 +275,3 @@ A norns sequencer/computer with 255 instructions.
 - INCR/DECR
 - MAJUP/MAJDOWN
 - RANDOM
-- MIDI send/release
