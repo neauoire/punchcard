@@ -1,6 +1,7 @@
 local Instructor = { dict = {} }
 
 local OCTAVE = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
+local MAJORS = { 'C','D','E','F','G','A','B' }
 
 -- Utils
 
@@ -122,8 +123,11 @@ Instructor.build_do = function(self,id,bin)
   local _type = self:make_do_type(id,bin)
   local _value = self:make_number(id,bin)
 
+  if _type ~= 'RAND' and _value > 8 then
+    _value = (_value - 8)..'M'
+  end
   if _type and _value then
-    self.dict[id] = { cmd = 'DO', key = _type, val = '' }
+    self.dict[id] = { cmd = 'DO', key = _type, val = _value }
   else
     print('Incomplete DO instruction: '..bin)
   end

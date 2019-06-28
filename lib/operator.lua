@@ -1,6 +1,7 @@
 local Operator = { senders = {}, bangs = {}, midi = {} }
 
 local OCTAVE = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
+local MAJORS = { 'C','D','E','F','G','A','B' }
 
 -- Utils
 
@@ -24,9 +25,14 @@ local index_of = function(list,value)
 end
 
 local note_to_num = function(note)
-  if note == 'RAND' then note = OCTAVE[math.random(#OCTAVE)] end
   return index_of(OCTAVE,note)-1
 end
+
+local num_to_note = function(num)
+  if num == 16 then return 'RAND' end -- RAND
+  return OCTAVE[((num-1) % 12)+1]
+end
+
 
 local midi_to_hz = function(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
@@ -110,6 +116,21 @@ Operator.run = function(self)
   self:send_midi()
 end
 
+Operator.special_mod = function(self,origin,mod)
+  if (mod..''):match('M') then
+    local real_mod = tonumber(mod:sub(1,#mod-1))
+    local origin_note = num_to_note(origin+1)
+    local origin_major = origin_note:sub(1,1)
+    local origin_index = index_of(MAJORS,origin_major)
+    local mod_key = ((origin_index + real_mod - 1) % #MAJORS)+1
+
+    return index_of(OCTAVE,MAJORS[mod_key])
+  else
+    return ((origin+tonumber(mod)-1)%16)+1
+  end
+  return 0
+end
+
 Operator.IF = function(self,key,val,res)
   res.skip = false
   if key == 'STEP' then
@@ -154,19 +175,19 @@ end
 
 Operator.DO = function(self,key,val,res)
   if res.skip == true then return end
+  local next_line_val = self.stack:get_line_val(res.id,res.line+1)
+  local origin = bin_to_num(next_line_val)
+  local mod = 0
   if key == 'INCR' then
-    local next_line_val = self.stack:get_line_val(res.id,res.line+1)
-    local next_line_num = bin_to_num(next_line_val)+1
-    self.stack:set_line_val(res.id,res.line+1,num_to_bin(next_line_num,4))
+    mod = val
+  elseif key == 'DECR' then
+    mod = '-'..val
+  elseif key == 'RAND' then
+    mod = -origin+(math.random(tonumber(val)))
   end
-  if key == 'DECR' then
-    local next_line_val = self.stack:get_line_val(res.id,res.line+1)
-    local next_line_num = (bin_to_num(next_line_val)-1) % 16
-    self.stack:set_line_val(res.id,res.line+1,num_to_bin(next_line_num,4))
-  end
-  if key == 'RAND' then
-    self.stack:set_line_val(res.id,res.line+1,num_to_bin(math.random(16),4))
-  end
+  local next_line_num = self:special_mod(origin,mod)
+  local next_line_bin = num_to_bin(next_line_num,4)
+  self.stack:set_line_val(res.id,res.line+1,next_line_bin)
 end
 
 -- Midi
