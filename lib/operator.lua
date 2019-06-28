@@ -9,6 +9,10 @@ local pos_at = function(id)
   return { x = math.floor(id % 16), y = math.floor(id/16)+1  }
 end
 
+local limited = function(list,index)
+  return list[((index-1)%#list)+1]
+end
+
 local limit = function(val,length)
   return ((val-1) % length)+1
 end
@@ -28,10 +32,22 @@ local note_to_num = function(note)
   return index_of(OCTAVE,note)-1
 end
 
-local num_to_note = function(num)
-  return OCTAVE[((num-1) % 12)+1]
+local note_with_offset = function(origin,offset)
+  local key = index_of(OCTAVE,origin)
+  local mod_key = ((key + offset - 1) % #OCTAVE)+1
+  return OCTAVE[mod_key]
 end
 
+local note_with_offset_major = function(origin,offset)
+  local major = origin:sub(1,1)
+  local key = index_of(MAJORS,major)
+  local mod_key = ((key + offset - 1) % #MAJORS)+1
+  return MAJORS[mod_key]
+end
+
+local num_to_note = function(num)
+  return OCTAVE[((num) % 12)+1]
+end
 
 local midi_to_hz = function(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
@@ -115,21 +131,6 @@ Operator.run = function(self)
   self:send_midi()
 end
 
-Operator.special_mod = function(self,origin,mod)
-  if (mod..''):match('M') then
-    local real_mod = tonumber(mod:sub(1,#mod-1))
-    local origin_note = num_to_note(origin+1)
-    local origin_major = origin_note:sub(1,1)
-    local origin_index = index_of(MAJORS,origin_major)
-    local mod_key = ((origin_index + real_mod - 1) % #MAJORS)+1
-    local mod_index = index_of(OCTAVE,MAJORS[mod_key])
-    return mod_index
-  else
-    return ((origin+tonumber(mod)-1)%16)+1
-  end
-  return 0
-end
-
 Operator.IF = function(self,key,val,res)
   res.skip = false
   if key == 'STEP' then
@@ -174,26 +175,30 @@ end
 
 Operator.DO = function(self,key,val,res)
   if res.skip == true then return end
-  local next_line_val = self.stack:get_line_val(res.id,res.line+1)
-  local origin = bin_to_num(next_line_val)
-  local mod = 0
+  local line_num = bin_to_num(self.stack:get_line_val(res.id,res.line+1))
+  local line_note = num_to_note(line_num)
   if key == 'INCR' then
-    mod = val
+    if (val..''):match('M') then
+      line_note = note_with_offset_major(line_note,tonumber(val:sub(1,#val-1)))
+    else
+      line_note = note_with_offset(line_note,tonumber(val))
+    end
   elseif key == 'DECR' then
-    mod = '-'..val
+    if (val..''):match('M') then
+      line_note = note_with_offset_major(line_note,-tonumber(val:sub(1,#val-1)))
+    else
+      line_note = note_with_offset(line_note,-tonumber(val))
+    end
   elseif key == 'RAND' then
     if (val..''):match('M') then
-      val = math.random(tonumber(val:sub(1,#val-1)))..'M'
+      line_note = limited(MAJORS,math.random(tonumber(val:sub(1,#val-1))))
     else
-      val = math.random(tonumber(val))
+      line_note = limited(OCTAVE,math.random(tonumber(val)))
     end
-    mod = val
-  else
-    return
   end
-  local next_line_num = self:special_mod(origin,mod)-1
-  local next_line_bin = num_to_bin(next_line_num,4)
-  self.stack:set_line_val(res.id,res.line+1,next_line_bin)
+  local new_num = note_to_num(line_note)
+  local new_bin = num_to_bin(new_num,4)
+  self.stack:set_line_val(res.id,res.line+1,new_bin)
 end
 
 -- Midi
