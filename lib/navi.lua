@@ -129,25 +129,26 @@ Navi.view_card = function(self)
     local inst_id = self.stack:get_instruction(self.card,l)
     local instruction = self.instructor:get(inst_id)
     local x = 0 ; 
-    local y = count*7
-    if count > 8 then x = 64 ; y = (count-8)*7 end
-    y = y + 2
-    screen.level(5)
-    screen.move(x,y)
-    if l == self.focus then
-      screen.text(' >')
-    else
-      screen.text(to_hex(inst_id))
-    end
-    screen.fill()
-    screen.level(15)
-    if instruction then
-      name = self.instructor:name(instruction)
-      screen.move(x+11,y)
-      screen.text(name)
-    end
-    screen.fill()
-    count = count + 1
+    local y = (count*7)+2
+    if count > 8 then x = 64 ; y = ((count-8)*7)+2 end
+    if inst_id > 0 then
+      screen.level(5)
+      screen.move(x,y)
+      if l == self.focus then
+        screen.text(' >')
+      else
+        screen.text(to_hex(inst_id))
+      end
+      screen.fill()
+      screen.level(15)
+      if instruction then
+        name = self.instructor:name(instruction)
+        screen.move(x+11,y)
+        screen.text(name)
+      end
+      screen.fill()
+      count = count + 1
+    end    
   end
 end
 
