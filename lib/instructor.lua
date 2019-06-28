@@ -25,7 +25,6 @@ local num_to_oct = function(num)
 end
 
 local num_to_note = function(num)
-  if num == 16 then return 'RAND' end -- RAND
   return OCTAVE[((num-1) % 12)+1]
 end
 
@@ -123,7 +122,7 @@ Instructor.build_do = function(self,id,bin)
   local _type = self:make_do_type(id,bin)
   local _value = self:make_number(id,bin)
 
-  if _type ~= 'RAND' and _value > 8 then
+  if _value > 8 then
     _value = (_value - 8)..'M'
   end
   if _type and _value then

@@ -29,7 +29,6 @@ local note_to_num = function(note)
 end
 
 local num_to_note = function(num)
-  if num == 16 then return 'RAND' end -- RAND
   return OCTAVE[((num-1) % 12)+1]
 end
 
@@ -123,8 +122,8 @@ Operator.special_mod = function(self,origin,mod)
     local origin_major = origin_note:sub(1,1)
     local origin_index = index_of(MAJORS,origin_major)
     local mod_key = ((origin_index + real_mod - 1) % #MAJORS)+1
-
-    return index_of(OCTAVE,MAJORS[mod_key])
+    local mod_index = index_of(OCTAVE,MAJORS[mod_key])
+    return mod_index
   else
     return ((origin+tonumber(mod)-1)%16)+1
   end
@@ -183,9 +182,16 @@ Operator.DO = function(self,key,val,res)
   elseif key == 'DECR' then
     mod = '-'..val
   elseif key == 'RAND' then
-    mod = -origin+(math.random(tonumber(val)))
+    if (val..''):match('M') then
+      val = math.random(tonumber(val:sub(1,#val-1)))..'M'
+    else
+      val = math.random(tonumber(val))
+    end
+    mod = val
+  else
+    return
   end
-  local next_line_num = self:special_mod(origin,mod)
+  local next_line_num = self:special_mod(origin,mod)-1
   local next_line_bin = num_to_bin(next_line_num,4)
   self.stack:set_line_val(res.id,res.line+1,next_line_bin)
 end
