@@ -1,6 +1,6 @@
 local Operator = { senders = {}, bangs = {}, midi = {} }
 
-local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+local OCTAVE = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
 
 -- Utils
 
@@ -25,11 +25,32 @@ end
 
 local note_to_num = function(note)
   if note == 'RAND' then note = OCTAVE[math.random(#OCTAVE)] end
-  return index_of({ 'C','c','D','d','E','F','f','G','g','A','a','B' },note)-1
+  return index_of(OCTAVE,note)-1
 end
 
 local midi_to_hz = function(note)
   return (440/32) * (2 ^ ((note - 9) / 12))
+end
+
+local bin_to_num = function(bin)
+  local bin = string.reverse(bin)
+  local sum = 0
+  for i = 1, string.len(bin) do
+    num = string.sub(bin, i,i) == "1" and 1 or 0
+    sum = sum + num * math.pow(2, i-1)
+  end
+  return math.floor(sum)
+end
+
+local num_to_bin = function(num,length)
+  local length = length or 8
+  local t = {}
+  for b=length,1,-1 do
+    rest = math.fmod(num,2)
+    t[b] = math.floor(rest)
+    num = (num-rest)/2
+  end
+  return table.concat(t)
 end
 
 -- Begin
@@ -63,8 +84,10 @@ end
 Operator.run_card = function(self,id,instructions)
   -- Defaults
   res = { id = id, OCT = 5, VEL = 16, STEP = self.navi:get_step(), FRAME = self.navi:get_step(), BANG = self.navi:get_bangs(id) }
+
   for id=1,#instructions do
-    local i = instructions[id]
+    local i = instructions[id].inst
+    res.line = instructions[id].line
     if i > 0 then
       local instruction = self.instructor:get(i)
       self:run_instruction(instruction,res)
@@ -88,7 +111,6 @@ Operator.run = function(self)
 end
 
 Operator.IF = function(self,key,val,res)
-  if res.broke == true then return end
   res.skip = false
   if key == 'STEP' then
     if tonumber(val) ~= limit(res.STEP,tonumber(val)) then res.skip = true end
@@ -102,7 +124,6 @@ Operator.IF = function(self,key,val,res)
 end
 
 Operator.SET = function(self,key,val,res)
-  if res.broke == true then return end
   if res.skip == true then return end
   if key == 'NOTE' then
     res.NOTE = math.floor(note_to_num(val))
@@ -114,7 +135,6 @@ end
 
 Operator.SEND = function(self,key,val,res)
   if res.skip == true then return end
-  if res.broke == true then return end
   if key == 'CHAN' then
     if res.NOTE == nil then return end
     local value = res.NOTE+(res.OCT*12)
@@ -134,22 +154,18 @@ end
 
 Operator.DO = function(self,key,val,res)
   if res.skip == true then return end
-  if res.broke == true then return end
-  if res.LAST == nil then return end
-  if res[res.LAST] == nil then return end
-  if key == 'SKIP' then res.skip = true end
-  if key == 'BREAK' then res.broke = true end
   if key == 'INCR' then
-    res[res.LAST] = tonumber(res[res.LAST]) + tonumber(val)
+    local next_line_val = self.stack:get_line_val(res.id,res.line+1)
+    local next_line_num = bin_to_num(next_line_val)+1
+    self.stack:set_line_val(res.id,res.line+1,num_to_bin(next_line_num,4))
   end
   if key == 'DECR' then
-    res[res.LAST] = tonumber(res[res.LAST]) - tonumber(val)
+    local next_line_val = self.stack:get_line_val(res.id,res.line+1)
+    local next_line_num = (bin_to_num(next_line_val)-1) % 16
+    self.stack:set_line_val(res.id,res.line+1,num_to_bin(next_line_num,4))
   end
-  if key == 'CLAMP' then
-    res[res.LAST] = clamp(tonumber(res[res.LAST]),1,tonumber(val))
-  end
-  if key == 'LIMIT' then
-    res[res.LAST] = limit(tonumber(res[res.LAST]),tonumber(val))
+  if key == 'RAND' then
+    self.stack:set_line_val(res.id,res.line+1,num_to_bin(math.random(16),4))
   end
 end
 

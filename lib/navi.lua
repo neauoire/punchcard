@@ -77,6 +77,7 @@ end
 Navi.stop = function(self)
   print('stop')
   self.is_playing = false
+  self.operator:release_midi()
   Navi.metro:stop()
   redraw()
 end

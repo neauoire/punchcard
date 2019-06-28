@@ -1,6 +1,6 @@
 local Instructor = { dict = {} }
 
-local OCTAVE = { 'C','c','D','d','E','F','f','G','g','A','a','B' }
+local OCTAVE = { 'C','C#','D','D#','E','F','F#','G','G#','A','A#','B' }
 
 -- Utils
 
@@ -26,6 +26,11 @@ end
 local num_to_note = function(num)
   if num == 16 then return 'RAND' end -- RAND
   return OCTAVE[((num-1) % 12)+1]
+end
+
+string.lpad = function(str, len, char)
+  if char == nil then char = ' ' end
+  return str .. string.rep(char, len - #str)
 end
 
 -- Begin
@@ -106,25 +111,19 @@ end
 -- WHEN
 
 Instructor.make_do_type = function(self,id,bin)
-  if char_at(bin,5,2) == '11' then return 'CLAMP'
+  if char_at(bin,5,2) == '11' then return 'RAND'
   elseif char_at(bin,5) == '1' then return 'INCR'
   elseif char_at(bin,6) == '1' then return 'DECR'
-  else return 'LIMIT' end
+  else return '' end
 end
 
 Instructor.build_do = function(self,id,bin)
-  -- Specials
-  if bin == '10000000' then self.dict[id] = { cmd = 'DO', key = 'BREAK', val = '' } ; return end
-  if bin == '01000000' then self.dict[id] = { cmd = 'DO', key = 'SKIP', val = '' } ; return end
   -- Normals
   local _type = self:make_do_type(id,bin)
   local _value = self:make_number(id,bin)
-  if _type == 'NOTE' then 
-    _value = num_to_note(_value)
-  end
 
   if _type and _value then
-    self.dict[id] = { cmd = 'DO', key = _type, val = _value }
+    self.dict[id] = { cmd = 'DO', key = _type, val = '' }
   else
     print('Incomplete DO instruction: '..bin)
   end
@@ -174,9 +173,33 @@ Instructor.build = function(self)
     end
   end
   print('Instruct','Completed.')
+  self:print()
 end
 
--- Utils
+Instructor.print = function(self)
+  text = ''
+  for id=1,(255/5) do
+    local bin = num_to_bin(id)
+    local name = self:name(self:get(id))
+    text = text..(bin..' '..name:lpad(12,' '))
+    bin = num_to_bin(id+1)
+    self:name(self:get(id+1))
+    text = text..(bin..' '..name:lpad(12,' '))
+    bin = num_to_bin(id+2)
+    self:name(self:get(id+2))
+    text = text..(bin..' '..name:lpad(12,' '))
+    bin = num_to_bin(id+3)
+    self:name(self:get(id+3))
+    text = text..(bin..' '..name:lpad(12,' '))
+    bin = num_to_bin(id+4)
+    self:name(self:get(id+4))
+    text = text..(bin..' '..name:lpad(12,' '))
+    text = text..'\n'
+  end
+  print(text)
+end
+
+-- Helpers
 
 Instructor.get = function(self,id)
   return self.dict[id]
@@ -187,7 +210,8 @@ Instructor.name = function(self,instruction)
   if instruction.cmd == nil then return 'ERROR:CMD' end
   if instruction.key == nil then return 'ERROR:KEY' end
   if instruction.val == nil then return 'ERROR:VAL' end
-  return instruction.cmd..instruction.key..instruction.val
+  if instruction.key == '' then return '--' end
+  return instruction.cmd..instruction.key..' '..instruction.val
 end
 
 return Instructor

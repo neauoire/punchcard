@@ -64,3 +64,7 @@ function redraw()
   navi.grid:refresh()
   screen.update()
 end
+
+function cleanup()
+  self.operator:release_midi()
+end

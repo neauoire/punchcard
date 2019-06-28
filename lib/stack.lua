@@ -76,24 +76,47 @@ Stack.get_cards = function(self)
   return cards
 end
 
-Stack.get_instruction = function(self,id,line_id)
-  res = {}
+Stack.get_line_val = function(self,id,line_id)
+  local res = {}
+  for y=1,4 do
+    table.insert(res,self:read(id,id_at(line_id,y)))
+  end
+  return line_to_bin(res)
+end
+
+Stack.get_line = function(self,id,line_id)
+  local res = {}
   for y=1,8 do
     table.insert(res,self:read(id,id_at(line_id,y)))
   end
-  return bin_to_num(line_to_bin(res))
+  return line_to_bin(res)
+end
+
+Stack.get_instruction = function(self,id,line_id)
+  return bin_to_num(self:get_line(id,line_id))
 end
 
 Stack.get_instructions = function(self,id)
   local a = {}
   for y=1,16 do
-    table.insert(a,self:get_instruction(id,y))
+    table.insert(a,{line = y, inst = self:get_instruction(id,y)})
   end
   return a
 end
 
 Stack.get_card = function(self,id)
   return self.cards[id]
+end
+
+Stack.set_line_val = function(self,id,line_id,bin)
+  for y=1,#bin do
+    local i = id_at(line_id,y)
+    if bin:sub(y,y) == '1' then
+      self:write(id,i,true)
+    else
+      self:write(id,i,false)
+    end
+  end
 end
 
 Stack.erase_card = function(self,id)

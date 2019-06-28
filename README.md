@@ -274,10 +274,4 @@ A norns sequencer/computer with 255 instructions.
 ## TODOs
 
 - OSC
-- INCR/DECR
 - MAJUP/MAJDOWN
-
-### Specials
-
-- SKIP
-- BREAK
