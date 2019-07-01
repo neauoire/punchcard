@@ -7,6 +7,8 @@
 --   \\\\////
 --
 
+local mdh = include('lib/mdh')
+
 local navi = include('lib/navi')
 local stack = include('lib/stack')
 local instructor = include('lib/instructor')
@@ -18,20 +20,22 @@ function init()
   -- Setup
   navi:bind(stack,instructor,operator)
   stack:bind(navi,instructor)
-  operator:bind(navi,stack,instructor)
-  -- Params
-  params:add{type = "number", id = "bpm", name = "BPM", min = 40, max = 400, default = 120, action=function(val) navi:set_bpm(val) end}
+  operator:bind(navi,stack,instructor,mdh)
   -- Init
+  mdh:init()
   stack:init()
   navi:init()
   instructor:init()
   operator:init()
+  -- Params
+  params:add{type = "number", id = "bpm", name = "BPM", min = 40, max = 400, default = 120, action=function(val) navi:set_bpm(val) end}
   -- Render Style
   screen.level(15)
   screen.aa(0)
   screen.line_width(1)
   -- Ready
   navi:start()
+  print('Ready.')
 end
 
 -- Interactions

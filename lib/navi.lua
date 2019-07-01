@@ -17,7 +17,7 @@ end
 -- Begin
 
 Navi.init = function(self)
-  print('Control','Init')
+  print('Navi','Init')
   self:connect()
 end
 
@@ -34,10 +34,10 @@ Navi.bind = function(self,stack,instructor,operator)
 end
 
 Navi.connect = function(self)
-  print('Navi','Connecting..')
+  print('Navi','Connecting to grid..')
   self.grid = grid.connect()
   self.grid.key = self.on_grid_key
-  print('Navi','Connected')
+  print('Navi','Connected to grid.')
 end
 
 Navi.is_connected = function(self)
@@ -68,14 +68,14 @@ Navi.toggle_play = function(self)
 end
 
 Navi.play = function(self)
-  print('play')
+  print('Navi','Play')
   self.is_playing = true
   Navi.metro:start()
   redraw()
 end
 
 Navi.stop = function(self)
-  print('stop')
+  print('Navi','Stop')
   self.is_playing = false
   self.operator:release_midi()
   Navi.metro:stop()

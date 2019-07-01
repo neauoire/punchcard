@@ -162,7 +162,7 @@ Instructor.make_number = function(self,id,bin)
 end
 
 Instructor.build = function(self)
-  print('Instruct','Building..')
+  print('Instructor','Building instructions..')
   for id=1,255 do
     local bin = num_to_bin(id)
     if string.sub(bin,7,8) == '11' then
@@ -175,8 +175,8 @@ Instructor.build = function(self)
       self:build_do(id,bin)
     end
   end
-  print('Instruct','Completed.')
-  self:print()
+  print('Instructor','Building instructions completed.')
+  -- self:print()
 end
 
 Instructor.print = function(self)

@@ -77,13 +77,14 @@ end
 -- Begin
 
 Operator.init = function(self)
-  self.midi_signal = midi.connect(1)
+  
 end
 
-Operator.bind = function(self,navi,stack,instructor)
+Operator.bind = function(self,navi,stack,instructor,mdh)
   self.navi = navi
   self.stack = stack
   self.instructor = instructor
+  self.mdh = mdh
 end
 
 Operator.reset = function(self)
@@ -221,14 +222,14 @@ end
 
 Operator.release_midi = function(self)
   while #self.midi > 0 do
-    self.midi_signal:note_off(self.midi[1].note,self.midi[1].velocity,self.midi[1].channel)
+    self.mdh.output:note_off(self.midi[1].note,self.midi[1].velocity,self.midi[1].channel)
     table.remove(self.midi)
   end
 end
 
 Operator.send_midi = function(self)
   for id=1,#self.midi do
-    self.midi_signal:note_on(self.midi[id].note,self.midi[id].velocity,self.midi[id].channel)
+    self.mdh.output:note_on(self.midi[id].note,self.midi[id].velocity,self.midi[id].channel)
   end
 end
 

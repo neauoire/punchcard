@@ -27,7 +27,7 @@ end
 -- Begin
 
 Stack.init = function(self)
-  print('Control','Init')
+  print('Stack','Init')
   self:build()
 end
 
